@@ -1,0 +1,16 @@
+{
+  "Group": "Widgets",
+  "FriendlyName": "Dynamic Pricing",
+  "SystemName": "i7MEDIA.Dynamic.Pricing",
+  "Version": "0.0.0",
+  "SupportedVersions": [
+    "4.90"
+  ],
+  "Author": "i7MEDIA",
+  "DisplayOrder": 1,
+  "FileName": "i7MEDIA.Plugin.Misc.Dynamic.Pricing.dll",
+  "Description": "Adjusts the price of products based on the current value of precious metals",
+  "DependsOnSystemNames": [
+    "i7MEDIA.Core"
+  ]
+}
