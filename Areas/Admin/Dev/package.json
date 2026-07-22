@@ -1,0 +1,5 @@
+{
+    "scripts": {
+        "move": "node move.js"
+    }
+}

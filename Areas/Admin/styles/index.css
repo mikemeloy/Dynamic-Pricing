@@ -1,0 +1,7 @@
+#dynamic-price-cards {
+    [data-actions] {
+        display: flex;
+        flex-direction: row-reverse;
+        margin: 1rem;
+    }
+}

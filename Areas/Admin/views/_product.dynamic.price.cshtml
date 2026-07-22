@@ -1,38 +1,54 @@
+@model AdminProductViewModel
+@inherits Nop.Web.Framework.Mvc.Razor.NopRazorPage<TModel>
+@using Nop.Web.Framework.UI
+@using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Models.ViewModels
+@using i7MEDIA.Plugin.Misc.Dynamic.Pricing
+@inject INopHtmlHelper NopHtml
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@addTagHelper *, Nop.Web.Framework
 
+@{
+    var version = "1.0.0";
+    var productId = Model.ProductId;
+    var saveRoute = Url.RouteUrl(PluginDefaults.SaveDynamicPrice);
+}
 
+<!link rel="stylesheet" href="/Plugins/i7MEDIA.Plugin.Misc.Dynamic.Pricing/Areas/Admin/Styles/index.css?v=@version" />
+<!script type="module">
+    import {init} from '/Plugins/i7MEDIA.Plugin.Misc.Dynamic.Pricing/Areas/Admin/Scripts/index.js?v=@version';
+
+    init({productId: '@productId', saveRoute: '@saveRoute'});
+</!script>
 
 <nop-cards id="dynamic-price-cards">
     <nop-card>
         <div class="card card-secondary card-outline" data-card-name="dynamic-price" data-hideattribute="ProductPage.HideDynamicPriceBlock">
             <div class="card-header with-border clearfix">
-                <div class="card-title"><i class="fas fa-info"></i>Dynamic Pricing</div>
+                <div class="card-title"><i class="fas fa-dollar-sign"></i>@T("Admin.Dynamic.Price.Section.Label")</div>
                 <div class="card-tools float-right"><button class="btn btn-tool" data-card-widget="collapse" type="button"><i class="fa toggle-icon fa-minus"></i></button></div>
             </div>
-            <section data-dynamic-price-config class="card-footer">
-                <header>
-                    <section>
-                        <header>@T("Admin.Dynamic.Price.Label.Metal.Type")</header>
-                        <main>
-                            
-                        </main>
-                    </section>
-                    <section data-sub>
-                        <header>@T("Admin.Dynamic.Price.Label.Base.Price")</header>
-                        <main>
-                           
-                        </main>
-                    </section>
-                </header>
-                <main>
-                    <header>Details</header>
-                    <section data-aspect-row>
+            <div class="card-body">
+                <section class="form-group row">
+                    <header class="col-md-3">
+                        <nop-label asp-for="SelectedMetalType" />
+                    </header>
+                    <main class="col-md-9">
+                        <nop-select asp-for="SelectedMetalType" asp-items="Model.AvailableMetalTypes" asp-multiple="false" />
+                    </main>
+                </section>
 
-                    </section>
-                </main>
-                <footer>
+                <section class="form-group row">
+                    <header class="col-md-3">
+                        <nop-label asp-for="BasePrice" />
+                    </header>
+                    <main class="col-md-9">
+                        <nop-editor asp-for="BasePrice" />
+                    </main>
+                </section>
+                <footer data-actions>
                     <button type="button" class="btn btn-success">@T("Admin.Dynamic.Price.Save")</button>
                 </footer>
-            </section>
+            </div>
         </div>
     </nop-card>
 </nop-cards>
