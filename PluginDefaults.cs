@@ -3,4 +3,5 @@
 public static class PluginDefaults
 {
     public static string SaveDynamicPrice => "Plugin.Widget.Dynamic.Price.Save";
+    public static string ScheduledTaskName => "i7MEDIA.Plugin.Misc.Dynamic.Pricing.ScheduledTasks.UpdatePreciousMetalPrices, i7MEDIA.Plugin.Misc.Dynamic.Pricing";
 }

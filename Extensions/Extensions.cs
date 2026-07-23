@@ -21,7 +21,7 @@ public static class Extensions
         return new()
         {
             BasePrice = source.BasePrice,
-            MetalType = source.MetalType,
+            MetalTypeId = source.MetalType,
             ProductId = source.ProductId
         };
     }

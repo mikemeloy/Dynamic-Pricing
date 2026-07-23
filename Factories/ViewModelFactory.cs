@@ -20,7 +20,7 @@ public class ViewModelFactory(IDynamicPriceService dynamicPriceService) : IViewM
         {
             BasePrice = dynamicPriceInfo.BasePrice,
             ProductId = productId,
-            SelectedMetalType = dynamicPriceInfo.MetalType,
+            SelectedMetalType = dynamicPriceInfo.MetalTypeId,
             AvailableMetalTypes = metalTypes.ToSelectItemList(
                 label: e => e.Name,
                 value: e => e.Id.ToString()

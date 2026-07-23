@@ -2,7 +2,7 @@
 
 public class DynamicPricingRequestModel
 {
-    public decimal BasePrice { get; internal set; }
-    public int MetalType { get; internal set; }
-    public int ProductId { get; internal set; }
+    public decimal BasePrice { get; set; }
+    public int MetalType { get; set; }
+    public int ProductId { get; set; }
 }

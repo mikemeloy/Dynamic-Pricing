@@ -15,7 +15,7 @@ public class DynamicPriceController(IDynamicPriceService dynamicPriceService) : 
     [AuthorizeAdmin]
     [Area(AreaNames.ADMIN)]
     [HttpPost]
-    public async Task<IActionResult> SaveAsync([FromBody] DynamicPricingRequestModel requestObject)
+    public async Task<IActionResult> SaveAsync(DynamicPricingRequestModel requestObject)
     {
         if (requestObject.IsNull())
         {

@@ -1,5 +1,7 @@
 ﻿using i7MEDIA.Plugin.Misc.Core.Extentions;
 using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Data;
+using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Models.Common;
+using Nop.Core.Domain.Catalog;
 using Nop.Data;
 
 namespace i7MEDIA.Plugin.Misc.Dynamic.Pricing.Repositories;
@@ -11,10 +13,14 @@ public interface IDynamicPricingRepository
     public Task<IList<DynamicPricingMetalType>> GetMetalTypesAsync();
     public Task<DynamicPricing?> GetDynamicPricingByProductIdAsync(int productId);
     public Task InsertMetalTypeAsync(DynamicPricingMetalType metalType);
+    public Task UpdateMetalTypeAsync(DynamicPricingMetalType pricingMetalType);
     public Task DeleteMetalTypeAsync(int metalTypeId);
+    public Task<IList<DynamicPricing>> GetAllDynamicPricingItemsAsync();
+    public Task<List<DynamicPricedProduct>> GetProductsByMetalTypeAssociationAsync();
+    public Task<decimal> GetProductPriceProductIdAsync(int productId);
 }
 
-public class DynamicPricingRepository(IRepository<DynamicPricingMetalType> metalTypeRepo, IRepository<DynamicPricing> dynamicPriceRepo) : IDynamicPricingRepository
+public class DynamicPricingRepository(IRepository<DynamicPricingMetalType> metalTypeRepo, IRepository<DynamicPricing> dynamicPriceRepo, IRepository<Product> productRepo) : IDynamicPricingRepository
 {
     public async Task InsertDynamicPricingAsync(DynamicPricing dynamicPrice)
     {
@@ -35,6 +41,15 @@ public class DynamicPricingRepository(IRepository<DynamicPricingMetalType> metal
              where !mt.Deleted
              select mt
         );
+    }
+
+    public async Task<IList<DynamicPricing>> GetAllDynamicPricingItemsAsync()
+    {
+        return await dynamicPriceRepo.GetAllAsync(async dynamicPrices =>
+       {
+           return from dp in dynamicPrices
+                  select dp;
+       });
     }
 
     public async Task<DynamicPricing?> GetDynamicPricingByProductIdAsync(int productId)
@@ -72,5 +87,30 @@ public class DynamicPricingRepository(IRepository<DynamicPricingMetalType> metal
         }
 
         await metalTypeRepo.DeleteAsync(existing);
+    }
+
+    public async Task UpdateMetalTypeAsync(DynamicPricingMetalType pricingMetalType)
+    {
+        await metalTypeRepo.UpdateAsync(pricingMetalType);
+    }
+
+    public async Task<List<DynamicPricedProduct>> GetProductsByMetalTypeAssociationAsync()
+    {
+        return (from p in productRepo.Table
+                join d in dynamicPriceRepo.Table on p.Id equals d.ProductId
+                join mt in metalTypeRepo.Table on d.MetalTypeId equals mt.Id
+                select new DynamicPricedProduct()
+                {
+                    MetalSymbol = mt.ApiSymbol,
+                    BasePrice = d.BasePrice,
+                    Product = p
+                }).ToList();
+    }
+
+    public Task<decimal> GetProductPriceProductIdAsync(int productId)
+    {
+        return (from p in productRepo.Table
+                where p.Id == productId
+                select p.Price).FirstOrDefaultAsync();
     }
 }
