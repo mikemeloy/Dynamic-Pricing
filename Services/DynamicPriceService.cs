@@ -1,6 +1,10 @@
 ﻿using i7MEDIA.Plugin.Misc.Core.Extentions;
 using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Data;
+using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Extensions;
 using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Repositories;
+using Nop.Core;
+using Nop.Core.Configuration;
+using Nop.Services.Configuration;
 using Nop.Services.Logging;
 using NUglify.Helpers;
 
@@ -16,18 +20,24 @@ public interface IDynamicPriceService
     public Task<IEnumerable<string>> GetMetalTypeSymbolsAsync();
     public Task UpdateMetalPrices(Dictionary<string, decimal> dicMetalValues);
     public Task UpdateProductPricesByMetalType();
+    public Task<T> GetSettingsAsync<T>() where T : ISettings, new();
+    public Task InsertInitialSettings();
 }
 
-public class DynamicPriceService(ILogger logger, IDynamicPricingRepository dynamicPricingRepository) : IDynamicPriceService
+public class DynamicPriceService(IStoreContext storeContext, ISettingService settingService, ILogger logger, IDynamicPricingRepository dynamicPricingRepository) : IDynamicPriceService
 {
     public async Task<DynamicPricing> GetProductDynamicPriceByProductIdAsync(int productId)
     {
         try
         {
+            var product = await dynamicPricingRepository.GetProductByIdAsync(productId);
+            var settings = await GetSettingsAsync<DynamicPriceSettings>();
+
             return await dynamicPricingRepository.GetDynamicPricingByProductIdAsync(productId) ??
                 new()
                 {
-                    BasePrice = await dynamicPricingRepository.GetProductPriceProductIdAsync(productId)
+                    BasePrice = product.Price,
+                    Weight = settings.DoWeightConversion(product.Weight)
                 };
         }
         catch (Exception ex)
@@ -92,6 +102,7 @@ public class DynamicPriceService(ILogger logger, IDynamicPricingRepository dynam
     {
         try
         {
+            await logger.LogDebugAsync($"{pricingMetalType.ApiSymbol} price set at {pricingMetalType.CurrentValue} @ {DateTime.UtcNow:G} UTC");
             await dynamicPricingRepository.UpdateMetalTypeAsync(pricingMetalType);
         }
         catch (Exception ex)
@@ -139,14 +150,53 @@ public class DynamicPriceService(ILogger logger, IDynamicPricingRepository dynam
     public async Task UpdateProductPricesByMetalType()
     {
         var metalTypes = await GetMetalTypesAsync();
-        var products = await dynamicPricingRepository.GetProductsByMetalTypeAssociationAsync();
+        var productGrouping = await dynamicPricingRepository.GetProductsByMetalTypeAssociationAsync();
 
-        foreach (var product in products)
+        foreach (var productInfo in productGrouping)
         {
-            var p = product.Product;
-            var x = product.BasePrice;
-            var y = product.MetalSymbol;
-            var z = metalTypes.FirstOrDefault(mt => mt.ApiSymbol == y);
+            var product = productInfo.Product;
+            var metalType = metalTypes.FirstOrDefault(mt => mt.ApiSymbol == productInfo.MetalSymbol);
+
+            if (metalType.IsNull())
+            {
+                continue;
+            }
+
+            var newPrice = await CalculateProductTotalByConversionSettingsAsync(
+                    basePrice: productInfo.BasePrice,
+                    weight: productInfo.Weight,
+                    currentValue: metalType.CurrentValue
+                );
+
+            await logger.LogDebugAsync($"Product {product.Name} (Id: {product.Id}) OldPrice: {product.Price} NewPrice:{newPrice} @ {DateTime.UtcNow:G}");
+
+            product.Price = newPrice;
+
+            await dynamicPricingRepository.UpdateProductAsync(product: product);
         }
+    }
+
+    public async Task<T> GetSettingsAsync<T>() where T : ISettings, new()
+    {
+        var storeScope = await storeContext.GetActiveStoreScopeConfigurationAsync();
+        var setting = await settingService.LoadSettingAsync<T>(storeScope);
+
+        return setting;
+    }
+
+    public async Task InsertInitialSettings()
+    {
+        var setting = new DynamicPriceSettings();
+
+        await settingService.SaveSettingAsync(setting);
+    }
+
+    private async Task<decimal> CalculateProductTotalByConversionSettingsAsync(decimal basePrice, decimal weight, decimal currentValue)
+    {
+
+        var convertedWeight = weight;
+        var totalValueByWeight = convertedWeight * currentValue;
+
+        return Math.Max(basePrice, totalValueByWeight);
     }
 }

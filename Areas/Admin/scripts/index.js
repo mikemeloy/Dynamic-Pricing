@@ -18,21 +18,32 @@ const
 
 const
     event = {
-        onSave_Click: async () => {
-            const
-                formData = new FormData(),
-                parent = document.querySelector('#dynamic-price-cards'),
-                metalType = parent.querySelector("[data-select2-id=SelectedMetalType]"),
-                basePrice = parent.querySelector("#BasePrice");
+        onSave_Click: async ({ currentTarget }) => {
+            currentTarget.disabled = true;
 
-            formData.append('ProductId', _productId);
-            formData.append('MetalType', metalType.value);
-            formData.append('BasePrice', basePrice.value);
+            try {
+                const
+                    formData = new FormData(),
+                    parent = document.querySelector('#dynamic-price-cards'),
+                    metalType = parent.querySelector("[data-select2-id=SelectedMetalType]"),
+                    weight = parent.querySelector("#Weight"),
+                    basePrice = parent.querySelector("#BasePrice");
 
-            const response = await fetch(_saveUrl, {
-                method: "POST",
-                body: formData
-            })
+                formData.append('ProductId', _productId);
+                formData.append('MetalType', metalType.value);
+                formData.append('BasePrice', basePrice.value);
+                formData.append('Weight', weight.value);
+
+
+                const response = await fetch(_saveUrl, {
+                    method: "POST",
+                    body: formData
+                });
+            } catch (error) {
+                console.error(error);
+            }
+
+            currentTarget.disabled = false;
         }
     }
 

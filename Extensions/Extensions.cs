@@ -1,6 +1,8 @@
 ﻿using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Data;
 using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Models.Requests;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Nop.Core.Domain.Logging;
+using Nop.Services.Logging;
 
 namespace i7MEDIA.Plugin.Misc.Dynamic.Pricing.Extensions;
 
@@ -22,7 +24,15 @@ public static class Extensions
         {
             BasePrice = source.BasePrice,
             MetalTypeId = source.MetalType,
-            ProductId = source.ProductId
+            ProductId = source.ProductId,
+            Weight = source.Weight
         };
     }
+
+    public static decimal DoWeightConversion(this DynamicPriceSettings source, decimal weight)
+    {
+        return source.WeightConversion * weight;
+    }
+
+    public static async Task LogDebugAsync(this ILogger source, string message) => await source.InsertLogAsync(LogLevel.Debug, message);
 }

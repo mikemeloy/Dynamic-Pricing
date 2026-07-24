@@ -19,6 +19,7 @@ public class ViewModelFactory(IDynamicPriceService dynamicPriceService) : IViewM
         return new()
         {
             BasePrice = dynamicPriceInfo.BasePrice,
+            Weight = dynamicPriceInfo.Weight,
             ProductId = productId,
             SelectedMetalType = dynamicPriceInfo.MetalTypeId,
             AvailableMetalTypes = metalTypes.ToSelectItemList(

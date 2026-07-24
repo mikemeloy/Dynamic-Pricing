@@ -4,4 +4,13 @@
         flex-direction: row-reverse;
         margin: 1rem;
     }
+
+    button {
+        min-width: 4rem;
+ 
+        &:disabled {
+            background-color: var(--gray);
+            border-color: var(--gray);
+        }
+    }
 }

@@ -17,7 +17,8 @@ public interface IDynamicPricingRepository
     public Task DeleteMetalTypeAsync(int metalTypeId);
     public Task<IList<DynamicPricing>> GetAllDynamicPricingItemsAsync();
     public Task<List<DynamicPricedProduct>> GetProductsByMetalTypeAssociationAsync();
-    public Task<decimal> GetProductPriceProductIdAsync(int productId);
+    public Task<Product> GetProductByIdAsync(int productId);
+    public Task UpdateProductAsync(Product product);
 }
 
 public class DynamicPricingRepository(IRepository<DynamicPricingMetalType> metalTypeRepo, IRepository<DynamicPricing> dynamicPriceRepo, IRepository<Product> productRepo) : IDynamicPricingRepository
@@ -103,14 +104,20 @@ public class DynamicPricingRepository(IRepository<DynamicPricingMetalType> metal
                 {
                     MetalSymbol = mt.ApiSymbol,
                     BasePrice = d.BasePrice,
+                    Weight = d.Weight,
                     Product = p
                 }).ToList();
     }
 
-    public Task<decimal> GetProductPriceProductIdAsync(int productId)
+    public Task<Product> GetProductByIdAsync(int productId)
     {
         return (from p in productRepo.Table
                 where p.Id == productId
-                select p.Price).FirstOrDefaultAsync();
+                select p).FirstOrDefaultAsync();
+    }
+
+    public async Task UpdateProductAsync(Product product)
+    {
+        await productRepo.UpdateAsync(product);
     }
 }

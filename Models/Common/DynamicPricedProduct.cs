@@ -7,4 +7,5 @@ public class DynamicPricedProduct
     public required string MetalSymbol { get; set; }
     public required Product Product { get; set; }
     public decimal BasePrice { get; set; }
+    public decimal Weight { get; set; }
 }

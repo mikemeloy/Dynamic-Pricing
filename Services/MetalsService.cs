@@ -32,8 +32,8 @@ public class MetalsService(IDynamicPriceService dynamicPriceService) : IMetalsSe
         var content = await response.Content.ReadAsStringAsync();
 #else        
         var rand = new Random();
-        var goldValue = rand.Next(0, 8000) / 100000.00;
-        var silverValue = rand.Next(0, 8000) / 5000.00;
+        var goldValue = rand.Next(0, 8000);
+        var silverValue = rand.Next(0, 700);
 
         var content = $"{{\"success\":true,\"base\":\"USD\",\"timestamp\":1784764799,\"rates\":{{\"USDXAG\":{silverValue},\"USDXAU\":{goldValue},\"XAG\":0.0169528822,\"XAU\":0.0002444298}}}}";
 #endif

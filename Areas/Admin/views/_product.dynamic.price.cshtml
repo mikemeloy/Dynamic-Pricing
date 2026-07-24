@@ -45,8 +45,18 @@
                         <nop-editor asp-for="BasePrice" />
                     </main>
                 </section>
+                <section class="form-group row">
+                    <header class="col-md-3">
+                        <nop-label asp-for="Weight" />
+                    </header>
+                    <main class="col-md-9">
+                        <nop-editor asp-for="Weight" />
+                    </main>
+                </section>
                 <footer data-actions>
-                    <button type="button" class="btn btn-success">@T("Admin.Dynamic.Price.Save")</button>
+                    <button type="button" class="btn btn-success">
+                        @T("Admin.Dynamic.Price.Save")
+                    </button>
                 </footer>
             </div>
         </div>

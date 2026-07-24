@@ -19,6 +19,7 @@ public class Plugin(ILocalizationService localizationService, IDynamicPriceServi
     {
         await AddOrUpdateLocaleResourceAsync();
         await InsertScheduledTaskAsync();
+        await dynamicPriceService.InsertInitialSettings();
     }
 
     public override async Task UninstallAsync()
@@ -62,7 +63,8 @@ public class Plugin(ILocalizationService localizationService, IDynamicPriceServi
             ["Admin.Dynamic.Price.Section.Label"] = "Dynamic Pricing",
             ["admin.dynamic.price.label.base.price"] = "Base Price",
             ["admin.dynamic.price.label.metal.type"] = "Metal Type",
-            ["Admin.Dynamic.Price.Save"] = "Save"
+            ["Admin.Dynamic.Price.Save"] = "Save",
+            ["admin.dynamic.price.label.metal.weight"] = "Weight (oz t)"
         });
     }
 
