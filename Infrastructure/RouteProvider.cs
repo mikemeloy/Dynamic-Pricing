@@ -12,9 +12,15 @@ public class RouteProvider : IRouteProvider
     public void RegisterRoutes(IEndpointRouteBuilder endpointRouteBuilder)
     {
         endpointRouteBuilder.MapControllerRoute(
-        name: PluginDefaults.SaveDynamicPrice,
-        pattern: "dynamicprice/save",
-        defaults: new { controller = "dynamicprice", action = "save", area = AreaNames.ADMIN }
-    );
+            name: PluginDefaults.SaveDynamicPrice,
+            pattern: "dynamicprice/save",
+            defaults: new { controller = "dynamicprice", action = "save", area = AreaNames.ADMIN }
+        );
+
+        endpointRouteBuilder.MapControllerRoute(
+            name: PluginDefaults.SaveDynamicPriceConfigure,
+            pattern: "dynamicprice/configure",
+            defaults: new { controller = "dynamicprice", action = "configure", area = AreaNames.ADMIN }
+        );
     }
 }

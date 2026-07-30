@@ -1,0 +1,17 @@
+﻿@using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Models.ViewModels
+@model ConfigureViewModel
+
+@{
+    Layout = "_ConfigurePlugin";
+    
+    var version = Model.Version;
+    var saveRoute = Model.SaveRoute;
+}
+
+<!link rel="stylesheet" href="/Plugins/i7MEDIA.Plugin.Misc.Dynamic.Pricing/Areas/Admin/Styles/configure.css?v=@version" />
+<!script type="module">
+    import {init} from '/Plugins/i7MEDIA.Plugin.Misc.Dynamic.Pricing/Areas/Admin/Scripts/configure.js?v=@version';
+
+    init({saveRoute: '@saveRoute'});
+</!script>
+<div data-container-configure>Hello World</div>

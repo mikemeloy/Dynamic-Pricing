@@ -10,7 +10,10 @@ const
   files = [
     '/Scripts/index.js',
     '/Styles/index.css',
-    '/Views/_product.dynamic.price.cshtml'
+    '/Scripts/configure.js',
+    '/Styles/configure.css',
+    '/Views/_product.dynamic.price.cshtml',
+    '/Views/configure.cshtml'
   ]
 
 files.forEach(file => {

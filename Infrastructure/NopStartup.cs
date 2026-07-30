@@ -19,6 +19,7 @@ public class NopStartup : INopStartup
 
     public void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
+        services.AddScoped<IDynamicShoppingCartRepository, DynamicShoppingCartRepository>();
         services.AddScoped<IDynamicPricingRepository, DynamicPricingRepository>();
         services.AddScoped<IDynamicPriceService, DynamicPriceService>();
         services.AddScoped<IViewModelFactory, ViewModelFactory>();

@@ -7,6 +7,7 @@ namespace i7MEDIA.Plugin.Misc.Dynamic.Pricing.Factories;
 public interface IViewModelFactory
 {
     public Task<AdminProductViewModel> GetAdminProductViewModel(int productId);
+    public ConfigureViewModel GetAdminConfigureViewModel();
 }
 
 public class ViewModelFactory(IDynamicPriceService dynamicPriceService) : IViewModelFactory
@@ -28,4 +29,7 @@ public class ViewModelFactory(IDynamicPriceService dynamicPriceService) : IViewM
             )
         };
     }
+
+    public ConfigureViewModel GetAdminConfigureViewModel() => new() { Version = "", SaveRoute = PluginDefaults.SaveDynamicPriceConfigure };
+
 }

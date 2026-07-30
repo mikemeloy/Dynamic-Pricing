@@ -2,6 +2,7 @@
 using i7MEDIA.Plugin.Misc.Dynamic.Pricing;
 using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Components;
 using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Services;
+using Nop.Core;
 using Nop.Core.Domain.ScheduleTasks;
 using Nop.Services.Cms;
 using Nop.Services.Localization;
@@ -11,9 +12,9 @@ using Nop.Web.Framework.Infrastructure;
 
 namespace i7MEDIA.Plugin.Misc.Dyanmic.Pricing;
 
-public class Plugin(ILocalizationService localizationService, IDynamicPriceService dynamicPriceService, IScheduleTaskService scheduleTaskService) : BasePlugin, IWidgetPlugin
+public class Plugin(ILocalizationService localizationService, IDynamicPriceService dynamicPriceService, IScheduleTaskService scheduleTaskService, IWebHelper webHelper) : BasePlugin, IWidgetPlugin
 {
-    public bool HideInWidgetList => throw new NotImplementedException();
+    public bool HideInWidgetList => false;
 
     public override async Task InstallAsync()
     {
@@ -29,7 +30,7 @@ public class Plugin(ILocalizationService localizationService, IDynamicPriceServi
 
     public override string GetConfigurationPageUrl()
     {
-        return base.GetConfigurationPageUrl();
+        return $"{webHelper.GetStoreLocation()}Admin/DynamicPrice/Configure";
     }
 
     public override async Task InstallSampleDataAsync()

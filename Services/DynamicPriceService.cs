@@ -1,12 +1,16 @@
 ﻿using i7MEDIA.Plugin.Misc.Core.Extentions;
 using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Data;
 using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Extensions;
+using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Factories;
 using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Repositories;
 using Nop.Core;
 using Nop.Core.Configuration;
+using Nop.Core.Domain.Orders;
+using Nop.Services.Catalog;
 using Nop.Services.Configuration;
+using Nop.Services.Customers;
+using Nop.Services.Discounts;
 using Nop.Services.Logging;
-using NUglify.Helpers;
 
 namespace i7MEDIA.Plugin.Misc.Dynamic.Pricing.Services;
 
@@ -24,7 +28,7 @@ public interface IDynamicPriceService
     public Task InsertInitialSettings();
 }
 
-public class DynamicPriceService(IStoreContext storeContext, ISettingService settingService, ILogger logger, IDynamicPricingRepository dynamicPricingRepository) : IDynamicPriceService
+public class DynamicPriceService(IStoreContext storeContext, ISettingService settingService, ILogger logger, IDynamicShoppingCartRepository shoppingCartRepository, IDynamicPricingRepository dynamicPricingRepository, IDiscountService discountService, ICustomerService customerService, IProductService productService) : IDynamicPriceService
 {
     public async Task<DynamicPricing> GetProductDynamicPriceByProductIdAsync(int productId)
     {
@@ -58,6 +62,7 @@ public class DynamicPriceService(IStoreContext storeContext, ISettingService set
             {
                 existing.MetalTypeId = pricing.MetalTypeId;
                 existing.BasePrice = pricing.BasePrice;
+                existing.Weight = pricing.Weight;
                 existing.UpdatedBy = -1;
 
                 await dynamicPricingRepository.UpdateDynamicPricingAsync(existing);
@@ -98,19 +103,6 @@ public class DynamicPriceService(IStoreContext storeContext, ISettingService set
         }
     }
 
-    public async Task UpdateMetalTypeAsync(DynamicPricingMetalType pricingMetalType)
-    {
-        try
-        {
-            await logger.LogDebugAsync($"{pricingMetalType.ApiSymbol} price set at {pricingMetalType.CurrentValue} @ {DateTime.UtcNow:G} UTC");
-            await dynamicPricingRepository.UpdateMetalTypeAsync(pricingMetalType);
-        }
-        catch (Exception ex)
-        {
-            await logger.ErrorAsync(nameof(UpdateMetalTypeAsync), ex);
-        }
-    }
-
     public async Task DeleteMetalTypeAsync(int metalTypeId)
     {
         try
@@ -143,18 +135,21 @@ public class DynamicPriceService(IStoreContext storeContext, ISettingService set
                              Deleted = metal.Deleted,
                          };
 
-
-        metalTypes.ForEach(async metalType => await UpdateMetalTypeAsync(metalType));
+        foreach (var metalType in metalTypes)
+        {
+            await UpdateMetalTypeAsync(metalType);
+        }
     }
 
     public async Task UpdateProductPricesByMetalType()
     {
         var metalTypes = await GetMetalTypesAsync();
         var productGrouping = await dynamicPricingRepository.GetProductsByMetalTypeAssociationAsync();
+        var cartItems = await shoppingCartRepository.GetAllCartItemsAsync();
+        var settings = await GetSettingsAsync<DynamicPriceSettings>();
 
         foreach (var productInfo in productGrouping)
         {
-            var product = productInfo.Product;
             var metalType = metalTypes.FirstOrDefault(mt => mt.ApiSymbol == productInfo.MetalSymbol);
 
             if (metalType.IsNull())
@@ -162,26 +157,29 @@ public class DynamicPriceService(IStoreContext storeContext, ISettingService set
                 continue;
             }
 
-            var newPrice = await CalculateProductTotalByConversionSettingsAsync(
-                    basePrice: productInfo.BasePrice,
-                    weight: productInfo.Weight,
-                    currentValue: metalType.CurrentValue
-                );
+            var product = productInfo.Product;
+            var oldPrice = product.Price;
+            var newPrice = productInfo.CalculatePrice(currentValue: metalType.CurrentValue);
+            var cartItem = cartItems.FirstOrDefault(ci => ci.ProductId == product.Id);
 
-            await logger.LogDebugAsync($"Product {product.Name} (Id: {product.Id}) OldPrice: {product.Price} NewPrice:{newPrice} @ {DateTime.UtcNow:G}");
+            await logger.LogDebugAsync($"Product {product.Name} (Id: {product.Id}) OldPrice: {oldPrice} NewPrice:{newPrice} @ {DateTime.UtcNow:G}");
 
             product.Price = newPrice;
 
             await dynamicPricingRepository.UpdateProductAsync(product: product);
+
+            if (cartItem.IsNotNull())
+            {
+                await InsertCartItemDiscountAsync(cartItem, newPrice, oldPrice, settings.CartPriceLock);
+            }
         }
     }
 
     public async Task<T> GetSettingsAsync<T>() where T : ISettings, new()
     {
         var storeScope = await storeContext.GetActiveStoreScopeConfigurationAsync();
-        var setting = await settingService.LoadSettingAsync<T>(storeScope);
 
-        return setting;
+        return await settingService.LoadSettingAsync<T>(storeScope);
     }
 
     public async Task InsertInitialSettings()
@@ -191,12 +189,45 @@ public class DynamicPriceService(IStoreContext storeContext, ISettingService set
         await settingService.SaveSettingAsync(setting);
     }
 
-    private async Task<decimal> CalculateProductTotalByConversionSettingsAsync(decimal basePrice, decimal weight, decimal currentValue)
+    private async Task UpdateMetalTypeAsync(DynamicPricingMetalType pricingMetalType)
     {
+        try
+        {
+            await logger.LogDebugAsync($"{pricingMetalType.ApiSymbol} price set at {pricingMetalType.CurrentValue} @ {DateTime.UtcNow:G} UTC");
+            await dynamicPricingRepository.UpdateMetalTypeAsync(pricingMetalType);
+        }
+        catch (Exception ex)
+        {
+            await logger.ErrorAsync(nameof(UpdateMetalTypeAsync), ex);
+        }
+    }
+    /// <summary>
+    /// Applies a temporary discount to a cart item if the dynamic price increases within a time specified by a the setting CartPriceLock
+    /// </summary>
+    public async Task InsertCartItemDiscountAsync(ShoppingCartItem cartItem, decimal newPrice, decimal oldPrice, int cartPriceLock)
+    {
+        var discountAmount = newPrice - oldPrice;
+        var now = DateTime.UtcNow;
+        var secondsInCart = (now - cartItem.CreatedOnUtc).TotalSeconds;
+        var remainingPriceLock = (cartPriceLock - secondsInCart);
 
-        var convertedWeight = weight;
-        var totalValueByWeight = convertedWeight * currentValue;
+        if (discountAmount <= decimal.Zero || remainingPriceLock <= double.NegativeZero)
+        {
+            return;
+        }
 
-        return Math.Max(basePrice, totalValueByWeight);
+        var discount = ObjectModelFactory.CreateDiscount(
+            discountAmount: discountAmount,
+            endDateUtc: cartItem.CreatedOnUtc.AddSeconds(cartPriceLock - secondsInCart),
+            adminComment: "Inserted via dynamic pricing",
+            name: $"discount product id: {cartItem.ProductId} for customer {cartItem.CustomerId} for {discountAmount}"
+        );
+
+        await discountService.InsertDiscountAsync(discount);
+        await productService.InsertDiscountProductMappingAsync(new() { EntityId = cartItem.ProductId, DiscountId = discount.Id });
+        await customerService.ApplyDiscountCouponCodeAsync(
+            customer: await customerService.GetCustomerByIdAsync(cartItem.CustomerId),
+            couponCode: discount.CouponCode
+        );
     }
 }
