@@ -10,6 +10,9 @@ public class DynamicPricing : BaseEntity
     /// </summary>
     public decimal Weight { get; set; }
     public int ProductId { get; set; }
+    /// <summary>
+    /// FK DynamicPricingMetalType
+    /// </summary>
     public int MetalTypeId { get; set; }
     public int UpdatedBy { get; set; }
     public DateTime CreatedOnUtc { get; set; }

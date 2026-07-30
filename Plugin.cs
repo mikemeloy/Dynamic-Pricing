@@ -65,7 +65,11 @@ public class Plugin(ILocalizationService localizationService, IDynamicPriceServi
             ["admin.dynamic.price.label.base.price"] = "Base Price",
             ["admin.dynamic.price.label.metal.type"] = "Metal Type",
             ["Admin.Dynamic.Price.Save"] = "Save",
-            ["admin.dynamic.price.label.metal.weight"] = "Weight (oz t)"
+            ["admin.dynamic.price.label.metal.weight"] = "Weight (oz t)",
+            ["admin.dynamic.price.configure.label.weight.conversion"] = "Conversion",
+            ["admin.dynamic.price.configure.api.key"] = "API key",
+            ["admin.dynamic.price.configure.api.end.point"] = "End Point",
+            ["admin.dynamic.price.configure.cart.lock"] = "Cart Lock"
         });
     }
 

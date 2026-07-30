@@ -15,6 +15,15 @@ public class DynamicPriceController(IDynamicPriceService dynamicPriceService, IV
 {
     [AuthorizeAdmin]
     [Area(AreaNames.ADMIN)]
+    public async Task<IActionResult> Configure()
+    {
+        var model = await viewModelFactory.GetAdminConfigureViewModel();
+
+        return View("~/Plugins/i7MEDIA.Plugin.Misc.Dynamic.Pricing/Areas/Admin/Views/Configure.cshtml", model);
+    }
+
+    [AuthorizeAdmin]
+    [Area(AreaNames.ADMIN)]
     [HttpPost]
     public async Task<IActionResult> SaveAsync(DynamicPricingRequestModel requestObject)
     {
@@ -32,10 +41,21 @@ public class DynamicPriceController(IDynamicPriceService dynamicPriceService, IV
 
     [AuthorizeAdmin]
     [Area(AreaNames.ADMIN)]
-    public async Task<IActionResult> Configure()
+    [HttpPost]
+    public async Task<IActionResult> SaveConfigureAsync(ConfigureRequestModel model)
     {
-        var model = viewModelFactory.GetAdminConfigureViewModel();
+        if (model.IsNull())
+        {
+            return BadRequest("Invalid Request");
+        }
 
-        return View("~/Plugins/i7MEDIA.Plugin.Misc.Dynamic.Pricing/Areas/Admin/Views/Configure.cshtml", model);
+        await dynamicPriceService.SaveSettingsAsync(
+             conversion: model.WeightConversion,
+             apiKey: model.ApiKey,
+             endpoint: model.ApiEndpoint,
+             cartPriceLockInSeconds: model.CartPriceLock
+         );
+
+        return Ok();
     }
 }

@@ -1,4 +1,13 @@
 [data-container-configure] {
-    background-color: red;
-    padding: 10rem;
+    >main {
+        display: grid;
+        grid-template-columns: min-content auto;
+        gap: 1rem;
+    }
+
+    >footer {
+        display: flex;
+        flex-direction: row-reverse;
+        margin: 1rem 0;
+    }
 }

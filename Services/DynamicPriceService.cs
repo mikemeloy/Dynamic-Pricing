@@ -26,6 +26,7 @@ public interface IDynamicPriceService
     public Task UpdateProductPricesByMetalType();
     public Task<T> GetSettingsAsync<T>() where T : ISettings, new();
     public Task InsertInitialSettings();
+    public Task SaveSettingsAsync(decimal conversion, string apiKey, string endpoint, int cartPriceLockInSeconds);
 }
 
 public class DynamicPriceService(IStoreContext storeContext, ISettingService settingService, ILogger logger, IDynamicShoppingCartRepository shoppingCartRepository, IDynamicPricingRepository dynamicPricingRepository, IDiscountService discountService, ICustomerService customerService, IProductService productService) : IDynamicPriceService
@@ -229,5 +230,23 @@ public class DynamicPriceService(IStoreContext storeContext, ISettingService set
             customer: await customerService.GetCustomerByIdAsync(cartItem.CustomerId),
             couponCode: discount.CouponCode
         );
+    }
+
+    public async Task SaveSettingsAsync(decimal conversion, string apiKey, string endpoint, int cartPriceLockInSeconds)
+    {
+        try
+        {
+            await settingService.SaveSettingAsync<DynamicPriceSettings>(new()
+            {
+                ApiEndpoint = endpoint,
+                ApiKey = apiKey,
+                WeightConversion = conversion,
+                CartPriceLock = cartPriceLockInSeconds
+            });
+        }
+        catch (Exception ex)
+        {
+            await logger.ErrorAsync(nameof(SaveSettingsAsync), ex);
+        }
     }
 }

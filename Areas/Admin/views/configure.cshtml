@@ -1,11 +1,18 @@
-﻿@using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Models.ViewModels
-@model ConfigureViewModel
+﻿@model ConfigureViewModel
+@inherits Nop.Web.Framework.Mvc.Razor.NopRazorPage<TModel>
+@using Nop.Web.Framework.UI
+@using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Models.ViewModels
+@using i7MEDIA.Plugin.Misc.Dynamic.Pricing
+@inject INopHtmlHelper NopHtml
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@addTagHelper *, Nop.Web.Framework
+
 
 @{
     Layout = "_ConfigurePlugin";
-    
+
     var version = Model.Version;
-    var saveRoute = Model.SaveRoute;
+    var saveRoute = Url.RouteUrl(Model.SaveRoute);
 }
 
 <!link rel="stylesheet" href="/Plugins/i7MEDIA.Plugin.Misc.Dynamic.Pricing/Areas/Admin/Styles/configure.css?v=@version" />
@@ -14,4 +21,25 @@
 
     init({saveRoute: '@saveRoute'});
 </!script>
-<div data-container-configure>Hello World</div>
+<div data-container-configure>
+
+    <main>
+        <nop-label asp-for="WeightConversion" />
+        <nop-editor asp-for="WeightConversion" />
+
+        <nop-label asp-for="ApiKey" />
+        <nop-editor asp-for="ApiKey" />
+
+        <nop-label asp-for="ApiEndpoint" />
+        <nop-editor asp-for="ApiEndpoint" />
+
+        <nop-label asp-for="CartPriceLock" />
+        <nop-editor asp-for="CartPriceLock" />
+    </main>
+    <footer data-actions>
+        <button type="button" data-save class="btn btn-success">
+            @T("Admin.Dynamic.Price.Save")
+        </button>
+
+    </section>
+</div>

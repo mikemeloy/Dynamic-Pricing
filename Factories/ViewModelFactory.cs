@@ -7,7 +7,7 @@ namespace i7MEDIA.Plugin.Misc.Dynamic.Pricing.Factories;
 public interface IViewModelFactory
 {
     public Task<AdminProductViewModel> GetAdminProductViewModel(int productId);
-    public ConfigureViewModel GetAdminConfigureViewModel();
+    public Task<ConfigureViewModel> GetAdminConfigureViewModel();
 }
 
 public class ViewModelFactory(IDynamicPriceService dynamicPriceService) : IViewModelFactory
@@ -30,6 +30,18 @@ public class ViewModelFactory(IDynamicPriceService dynamicPriceService) : IViewM
         };
     }
 
-    public ConfigureViewModel GetAdminConfigureViewModel() => new() { Version = "", SaveRoute = PluginDefaults.SaveDynamicPriceConfigure };
+    public async Task<ConfigureViewModel> GetAdminConfigureViewModel()
+    {
+        var settings = await dynamicPriceService.GetSettingsAsync<DynamicPriceSettings>();
 
+        return new()
+        {
+            Version = "",
+            SaveRoute = PluginDefaults.SaveDynamicPriceConfigure,
+            ApiKey = settings.ApiKey,
+            WeightConversion = settings.WeightConversion,
+            ApiEndpoint = settings.ApiEndpoint,
+            CartPriceLock = settings.CartPriceLock
+        };
+    }
 }

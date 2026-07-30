@@ -2,5 +2,8 @@
 
 public class ConfigureRequestModel
 {
-    public int MyProperty { get; set; }
+    public required string ApiEndpoint { get; set; }
+    public required string ApiKey { get; set; }
+    public decimal WeightConversion { get; set; }
+    public int CartPriceLock { get; set; }
 }
