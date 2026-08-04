@@ -17,8 +17,12 @@
     <None Remove="Areas\Admin\styles\index.css" />
     <None Remove="Areas\Admin\views\configure.cshtml" />
     <None Remove="Areas\Admin\views\_product.dynamic.price.cshtml" />
+    <None Remove="Areas\Public\scripts\banner.js" />
     <None Remove="Areas\Public\scripts\index.js" />
+    <None Remove="Areas\Public\styles\banner.css" />
     <None Remove="Areas\Public\styles\index.css" />
+    <None Remove="Areas\Public\views\DynamicPriceBanner.cshtml" />
+    <None Remove="Areas\_ViewImports.cshtml" />
     <None Remove="plugin.json" />
   </ItemGroup>
 
@@ -48,10 +52,22 @@
     <Content Include="Areas\Admin\views\_product.dynamic.price.cshtml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Areas\Public\scripts\banner.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Areas\Public\scripts\index.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Areas\Public\styles\banner.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Areas\Public\styles\index.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Public\views\DynamicPriceBanner.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\_ViewImports.cshtml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="plugin.json">

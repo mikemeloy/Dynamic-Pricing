@@ -22,7 +22,7 @@ public class NopStartup : INopStartup
         services.AddScoped<IDynamicShoppingCartRepository, DynamicShoppingCartRepository>();
         services.AddScoped<IDynamicPricingRepository, DynamicPricingRepository>();
         services.AddScoped<IDynamicPriceService, DynamicPriceService>();
-        services.AddScoped<IViewModelFactory, ViewModelFactory>();
+        services.AddScoped<IDynamicPriceViewModelFactory, ViewModelFactory>();
         services.AddScoped<IMetalsService, MetalsService>();
     }
 }

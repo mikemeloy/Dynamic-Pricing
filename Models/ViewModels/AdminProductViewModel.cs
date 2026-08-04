@@ -5,6 +5,7 @@ namespace i7MEDIA.Plugin.Misc.Dynamic.Pricing.Models.ViewModels;
 
 public class AdminProductViewModel()
 {
+    public string Version { get; set; }
     public int ProductId { get; set; }
     [NopResourceDisplayName("admin.dynamic.price.label.base.price")]
     public decimal BasePrice { get; set; }

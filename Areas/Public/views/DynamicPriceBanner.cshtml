@@ -1,0 +1,33 @@
+﻿@model BannerViewModel
+
+@{
+    var version = Model.Version;
+    var goldValue = Model.GoldPrice;
+    var silverValue = Model.SilverPrice;
+    var goldDelta = Model.GoldDelta;
+    var silverDelta = Model.SilverDelta;
+}
+
+<!link rel="stylesheet" href="/Plugins/i7MEDIA.Plugin.Misc.Dynamic.Pricing/Areas/Public/styles/banner.css?v=@version" />
+<!script type="module">
+    import {init} from '/Plugins/i7MEDIA.Plugin.Misc.Dynamic.Pricing/Areas/Public/scripts/banner.js?v=@version';
+
+    init({});
+</!script>
+<div data-dynamic-price-banner>
+    <section>
+        <span data-value-label>@T("admin.dynamic.price.banner.span.gold")</span>
+        @goldValue.ToCurrency()
+        <span data-positive="@(goldDelta > 0)"></span>
+        <span>@goldDelta.ToCurrency()</span>
+    </section>
+    <section>
+        <span data-value-label> @T("admin.dynamic.price.banner.span.silver")</span>
+        @silverValue.ToCurrency()
+        <span data-positive="@(silverDelta > 0)"></span>
+        <span>@silverDelta.ToCurrency()</span>
+    </section>
+    <section data-dynamic-price-timer>
+        <span>@T("admin.dynamic.price.banner.label.timer")</span><span data-timer>5:00</span>
+    </section>
+</div>
