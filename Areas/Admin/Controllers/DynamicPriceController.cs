@@ -11,11 +11,11 @@ using Nop.Web.Framework.Mvc.Filters;
 
 namespace i7MEDIA.Plugin.Misc.Dynamic.Pricing.Areas.Admin.Controllers;
 
-public class DynamicPriceController(IDynamicPriceService dynamicPriceService, IViewModelFactory viewModelFactory) : BasePluginController
+public class DynamicPriceController(IDynamicPriceService dynamicPriceService, IDynamicPriceViewModelFactory viewModelFactory) : BasePluginController
 {
     [AuthorizeAdmin]
     [Area(AreaNames.ADMIN)]
-    public async Task<IActionResult> Configure()
+    public async Task<IActionResult> ConfigureAsync()
     {
         var model = await viewModelFactory.GetAdminConfigureViewModel();
 

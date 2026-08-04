@@ -43,7 +43,8 @@ public class Plugin(ILocalizationService localizationService, IDynamicPriceServi
     public Task<IList<string>> GetWidgetZonesAsync()
     {
         return Task.FromResult<IList<string>>(new List<string> {
-            AdminWidgetZones.ProductDetailsBlock
+            AdminWidgetZones.ProductDetailsBlock,
+            PublicWidgetZones.BodyStartHtmlTagAfter
         });
     }
 
@@ -54,6 +55,11 @@ public class Plugin(ILocalizationService localizationService, IDynamicPriceServi
             return typeof(DynamicPricingProductComponent);
         }
 
+        if (widgetZone == PublicWidgetZones.BodyStartHtmlTagAfter)
+        {
+            return typeof(DynamicPriceBannerComponent);
+        }
+
         return typeof(DynamicPricingProductComponent);
     }
 
@@ -61,15 +67,18 @@ public class Plugin(ILocalizationService localizationService, IDynamicPriceServi
     {
         await localizationService.AddOrUpdateLocaleResourceAsync(new Dictionary<string, string>
         {
-            ["Admin.Dynamic.Price.Section.Label"] = "Dynamic Pricing",
+            ["Admin.dynamic.Price.Section.Label"] = "Dynamic Pricing",
             ["admin.dynamic.price.label.base.price"] = "Base Price",
             ["admin.dynamic.price.label.metal.type"] = "Metal Type",
-            ["Admin.Dynamic.Price.Save"] = "Save",
+            ["Admin.dynamic.Price.Save"] = "Save",
             ["admin.dynamic.price.label.metal.weight"] = "Weight (oz t)",
             ["admin.dynamic.price.configure.label.weight.conversion"] = "Conversion",
             ["admin.dynamic.price.configure.api.key"] = "API key",
             ["admin.dynamic.price.configure.api.end.point"] = "End Point",
-            ["admin.dynamic.price.configure.cart.lock"] = "Cart Lock"
+            ["admin.dynamic.price.configure.cart.lock"] = "Cart Lock",
+            ["admin.dynamic.price.banner.label.gold"] = "Gold",
+            ["admin.dynamic.price.banner.label.silver"] = "Silver",
+            ["admin.dynamic.price.banner.label.timer"] = "Time Left:"
         });
     }
 

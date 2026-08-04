@@ -36,6 +36,12 @@ public class DynamicPriceService(IStoreContext storeContext, ISettingService set
         try
         {
             var product = await dynamicPricingRepository.GetProductByIdAsync(productId);
+
+            if (product.IsNull())
+            {
+                return new();
+            }
+
             var settings = await GetSettingsAsync<DynamicPriceSettings>();
 
             return await dynamicPricingRepository.GetDynamicPricingByProductIdAsync(productId) ??
@@ -132,6 +138,7 @@ public class DynamicPriceService(IStoreContext storeContext, ISettingService set
                              Name = metal.Name,
                              Description = metal.Description,
                              ApiSymbol = metal.ApiSymbol,
+                             PreviousValue = metal.CurrentValue,
                              CurrentValue = sv.Value,
                              Deleted = metal.Deleted,
                          };
@@ -185,9 +192,9 @@ public class DynamicPriceService(IStoreContext storeContext, ISettingService set
 
     public async Task InsertInitialSettings()
     {
-        var setting = new DynamicPriceSettings();
-
-        await settingService.SaveSettingAsync(setting);
+        await settingService.SaveSettingAsync(
+            settings: new DynamicPriceSettings()
+        );
     }
 
     private async Task UpdateMetalTypeAsync(DynamicPricingMetalType pricingMetalType)

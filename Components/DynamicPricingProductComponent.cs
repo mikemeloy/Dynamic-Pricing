@@ -5,7 +5,7 @@ using Nop.Web.Framework.Components;
 
 namespace i7MEDIA.Plugin.Misc.Dynamic.Pricing.Components;
 
-public class DynamicPricingProductComponent(IViewModelFactory viewModelFactory) : NopViewComponent
+public class DynamicPricingProductComponent(IDynamicPriceViewModelFactory viewModelFactory) : NopViewComponent
 {
     public async Task<IViewComponentResult> InvokeAsync(string widgetZone, ProductModel additionalData)
     {
