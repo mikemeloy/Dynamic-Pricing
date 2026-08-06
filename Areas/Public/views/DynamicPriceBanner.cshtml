@@ -5,29 +5,36 @@
     var goldValue = Model.GoldPrice;
     var silverValue = Model.SilverPrice;
     var goldDelta = Model.GoldDelta;
+    var goldSymbol = Model.GoldSymbol;
+    var silerSymbol = Model.SilverSymbol;
     var silverDelta = Model.SilverDelta;
+    var secondsSinceLastUpdate = Model.SecondsSinceLastPriceUpdate;
+    var updateInterval = Model.CartPriceLock;
 }
 
 <!link rel="stylesheet" href="/Plugins/i7MEDIA.Plugin.Misc.Dynamic.Pricing/Areas/Public/styles/banner.css?v=@version" />
 <!script type="module">
     import {init} from '/Plugins/i7MEDIA.Plugin.Misc.Dynamic.Pricing/Areas/Public/scripts/banner.js?v=@version';
 
-    init({});
+    init({
+        secondsSinceLastUpdate:@secondsSinceLastUpdate,
+        updateInterval: @updateInterval
+    });
 </!script>
 <div data-dynamic-price-banner>
-    <section>
+    <section data-metal-symbol="@goldSymbol">
         <span data-value-label>@T("admin.dynamic.price.banner.span.gold")</span>
-        @goldValue.ToCurrency()
+        <span data-current>@goldValue.ToCurrency()</span>
         <span data-positive="@(goldDelta > 0)"></span>
-        <span>@goldDelta.ToCurrency()</span>
+        <span data-delta>@goldDelta.ToCurrency()</span>
     </section>
-    <section>
+    <section data-metal-symbol="@silerSymbol">
         <span data-value-label> @T("admin.dynamic.price.banner.span.silver")</span>
-        @silverValue.ToCurrency()
+        <span data-current>@silverValue.ToCurrency()</span>
         <span data-positive="@(silverDelta > 0)"></span>
-        <span>@silverDelta.ToCurrency()</span>
+        <span data-delta>@silverDelta.ToCurrency()</span>
     </section>
     <section data-dynamic-price-timer>
-        <span>@T("admin.dynamic.price.banner.label.timer")</span><span data-timer>5:00</span>
+        <span>@T("admin.dynamic.price.banner.label.timer")</span><span data-timer>--:--</span>
     </section>
 </div>

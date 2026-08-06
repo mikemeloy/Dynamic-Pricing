@@ -31,17 +31,18 @@ public class MetalsService(IStoreContext storeContext, ISettingService settingSe
         try
         {
 #if !DEBUG
-        var settings = await GetSettingsAsync<DynamicPriceSettings>();
-        var client = new HttpClient();
-        var request = new HttpRequestMessage(HttpMethod.Get, $"{settings.ApiEndpoint}?api_key={settings.ApiKey}&base=USD&currencies={string.Join(',', metalTypes)}");
-        var response = await client.SendAsync(request);
-        var content = await response.Content.ReadAsStringAsync();
+            var settings = await GetSettingsAsync<DynamicPriceSettings>();
+            var client = new HttpClient();
+            var url = $"{settings.ApiEndpoint}?api_key={settings.ApiKey}&base=USD&currencies={string.Join(',', metalTypes)}";
+            var request = new HttpRequestMessage(HttpMethod.Get, url);
+            var response = await client.SendAsync(request);
+            var content = await response.Content.ReadAsStringAsync();
 #else
             var rand = new Random();
             var goldValue = rand.Next(7000, 8000);
             var silverValue = rand.Next(500, 700);
 
-            var content = $"{{\"success\":true,\"base\":\"USD\",\"timestamp\":1784764799,\"rates\":{{\"USDXAG\":{silverValue},\"USDXAU\":{goldValue},\"XAG\":0.0169528822,\"XAU\":0.0002444298}}}}";
+            var content = $"{{\"success\":true,\"base\":\"USD\",\"timestamp\":1784764799,\"rates\":{{\"USDXAG\":{goldValue},\"USDXAU\":{silverValue},\"XAG\":0.0169528822,\"XAU\":0.0002444298}}}}";
 #endif
             var apiResponse = JsonSerializer.Deserialize<PreciousMetalsApiResponse>(content);
 
@@ -54,7 +55,7 @@ public class MetalsService(IStoreContext storeContext, ISettingService settingSe
                     select new
                     {
                         Key = symbol,
-                        Value = apiResponse.Rates[symbol]?.GetValue<decimal>() ?? 0
+                        Value = apiResponse.Rates[$"{apiResponse.Base}{symbol}"]?.GetValue<decimal>() ?? 0
                     }).ToDictionary(k => k.Key, v => v.Value);
         }
         catch (Exception ex)

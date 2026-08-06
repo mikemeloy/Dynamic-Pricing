@@ -37,5 +37,8 @@
   [data-dynamic-price-timer] {
     margin-left: auto;
     padding-inline: 2rem;
+    [data-timer] {
+      width: 3rem;
+    }
   }
 }

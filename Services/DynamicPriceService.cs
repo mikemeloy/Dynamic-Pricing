@@ -6,11 +6,13 @@ using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Repositories;
 using Nop.Core;
 using Nop.Core.Configuration;
 using Nop.Core.Domain.Orders;
+using Nop.Core.Domain.ScheduleTasks;
 using Nop.Services.Catalog;
 using Nop.Services.Configuration;
 using Nop.Services.Customers;
 using Nop.Services.Discounts;
 using Nop.Services.Logging;
+using Nop.Services.ScheduleTasks;
 
 namespace i7MEDIA.Plugin.Misc.Dynamic.Pricing.Services;
 
@@ -27,9 +29,10 @@ public interface IDynamicPriceService
     public Task<T> GetSettingsAsync<T>() where T : ISettings, new();
     public Task InsertInitialSettings();
     public Task SaveSettingsAsync(decimal conversion, string apiKey, string endpoint, int cartPriceLockInSeconds);
+    public Task<ScheduleTask> GetDynamicPriceScheduledTaskAsync();
 }
 
-public class DynamicPriceService(IStoreContext storeContext, ISettingService settingService, ILogger logger, IDynamicShoppingCartRepository shoppingCartRepository, IDynamicPricingRepository dynamicPricingRepository, IDiscountService discountService, ICustomerService customerService, IProductService productService) : IDynamicPriceService
+public class DynamicPriceService(IScheduleTaskService scheduleTaskService, IStoreContext storeContext, ISettingService settingService, ILogger logger, IDynamicShoppingCartRepository shoppingCartRepository, IDynamicPricingRepository dynamicPricingRepository, IDiscountService discountService, ICustomerService customerService, IProductService productService) : IDynamicPriceService
 {
     public async Task<DynamicPricing> GetProductDynamicPriceByProductIdAsync(int productId)
     {
@@ -214,15 +217,14 @@ public class DynamicPriceService(IStoreContext storeContext, ISettingService set
     /// </summary>
     public async Task InsertCartItemDiscountAsync(ShoppingCartItem cartItem, decimal newPrice, decimal oldPrice, int cartPriceLock)
     {
-        var discountAmount = newPrice - oldPrice;
-        var now = DateTime.UtcNow;
-        var secondsInCart = (now - cartItem.CreatedOnUtc).TotalSeconds;
-        var remainingPriceLock = (cartPriceLock - secondsInCart);
+        var secondsInCart = (DateTime.UtcNow - cartItem.CreatedOnUtc).TotalSeconds;
 
-        if (discountAmount <= decimal.Zero || remainingPriceLock <= double.NegativeZero)
+        if (oldPrice > newPrice || secondsInCart > cartPriceLock)
         {
             return;
         }
+
+        var discountAmount = newPrice - oldPrice;
 
         var discount = ObjectModelFactory.CreateDiscount(
             discountAmount: discountAmount,
@@ -243,17 +245,36 @@ public class DynamicPriceService(IStoreContext storeContext, ISettingService set
     {
         try
         {
+            var settings = await GetSettingsAsync<DynamicPriceSettings>();
+
             await settingService.SaveSettingAsync<DynamicPriceSettings>(new()
             {
                 ApiEndpoint = endpoint,
                 ApiKey = apiKey,
                 WeightConversion = conversion,
-                CartPriceLock = cartPriceLockInSeconds
+                CartPriceLock = cartPriceLockInSeconds,
+                GoldSymbol = settings.GoldSymbol,
+                SilverSymbol = settings.SilverSymbol
             });
         }
         catch (Exception ex)
         {
             await logger.ErrorAsync(nameof(SaveSettingsAsync), ex);
         }
+    }
+
+    public async Task<ScheduleTask> GetDynamicPriceScheduledTaskAsync()
+    {
+        try
+        {
+            return await scheduleTaskService.GetTaskByTypeAsync(PluginDefaults.ScheduledTaskType);
+
+        }
+        catch (Exception ex)
+        {
+            await logger.ErrorAsync(nameof(GetDynamicPriceScheduledTaskAsync), ex);
+        }
+
+        return new();
     }
 }

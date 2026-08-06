@@ -45,6 +45,18 @@ public static class Extensions
 
         return Math.Max(source.BasePrice, source.Weight * currentValue);
     }
+    /// <summary>
+    /// Gets the difference between the source date and now in seconds
+    /// </summary> 
+    public static int DeltaInSeconds(this DateTime? source)
+    {
+        if (source.IsNull())
+        {
+            return 0;
+        }
+
+        return Math.Max(0, Convert.ToInt32((DateTime.UtcNow - source.Value).TotalSeconds));
+    }
 
     public static async Task LogDebugAsync(this ILogger source, string message) => await source.InsertLogAsync(LogLevel.Debug, message);
 }

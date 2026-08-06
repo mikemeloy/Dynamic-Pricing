@@ -55,6 +55,7 @@ public class ViewModelFactory(IPluginService pluginService, IDynamicPriceService
     {
         var values = await dynamicPriceService.GetMetalTypesAsync();
         var settings = await dynamicPriceService.GetSettingsAsync<DynamicPriceSettings>();
+        var scheduledTask = await dynamicPriceService.GetDynamicPriceScheduledTaskAsync();
 
         var gold = values.FirstOrDefault(x => x.ApiSymbol == settings.GoldSymbol);
         var silver = values.FirstOrDefault(s => s.ApiSymbol == settings.SilverSymbol);
@@ -64,8 +65,12 @@ public class ViewModelFactory(IPluginService pluginService, IDynamicPriceService
             Version = await GetPluginVersionAsync(),
             GoldPrice = gold.GetValueOrDefault(g => g.CurrentValue, 0.0m),
             GoldDelta = gold.GetValueOrDefault(g => g.CurrentValue, 0.0m) - gold.GetValueOrDefault(g => g.PreviousValue, 0.0m),
+            GoldSymbol = gold.GetValueOrDefault(g => g.ApiSymbol, ""),
             SilverPrice = silver.GetValueOrDefault(s => s.CurrentValue, 0.0m),
-            SilverDelta = silver.GetValueOrDefault(s => s.CurrentValue, 0.0m) - silver.GetValueOrDefault(s => s.PreviousValue, 0.0m)
+            SilverDelta = silver.GetValueOrDefault(s => s.CurrentValue, 0.0m) - silver.GetValueOrDefault(s => s.PreviousValue, 0.0m),
+            SilverSymbol = silver.GetValueOrDefault(s => s.ApiSymbol, ""),
+            CartPriceLock = settings.CartPriceLock,
+            SecondsSinceLastPriceUpdate = Math.Min(settings.CartPriceLock, scheduledTask.LastSuccessUtc.DeltaInSeconds())
         };
     }
 
