@@ -5,7 +5,6 @@ using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Factories;
 using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Repositories;
 using Nop.Core;
 using Nop.Core.Configuration;
-using Nop.Core.Domain.Orders;
 using Nop.Core.Domain.ScheduleTasks;
 using Nop.Services.Catalog;
 using Nop.Services.Configuration;
@@ -156,7 +155,6 @@ public class DynamicPriceService(IScheduleTaskService scheduleTaskService, IStor
     {
         var metalTypes = await GetMetalTypesAsync();
         var productGrouping = await dynamicPricingRepository.GetProductsByMetalTypeAssociationAsync();
-        var cartItems = await shoppingCartRepository.GetAllCartItemsAsync();
         var settings = await GetSettingsAsync<DynamicPriceSettings>();
 
         foreach (var productInfo in productGrouping)
@@ -171,18 +169,13 @@ public class DynamicPriceService(IScheduleTaskService scheduleTaskService, IStor
             var product = productInfo.Product;
             var oldPrice = product.Price;
             var newPrice = productInfo.CalculatePrice(currentValue: metalType.CurrentValue);
-            var cartItem = cartItems.FirstOrDefault(ci => ci.ProductId == product.Id);
-
-            await logger.LogDebugAsync($"Product {product.Name} (Id: {product.Id}) OldPrice: {oldPrice} NewPrice:{newPrice} @ {DateTime.UtcNow:G}");
 
             product.Price = newPrice;
+            product.CustomerEntersPrice = false;
 
+            await logger.LogDebugAsync($"Product {product.Name} (Id: {product.Id}) OldPrice: {oldPrice} NewPrice:{newPrice} @ {DateTime.UtcNow:G}");
             await dynamicPricingRepository.UpdateProductAsync(product: product);
-
-            if (cartItem.IsNotNull())
-            {
-                await InsertCartItemDiscountAsync(cartItem, newPrice, oldPrice, settings.CartPriceLock);
-            }
+            await UpdateDynamicallyPriceCartItemsAsync(product.Id, newPrice, oldPrice, settings.CartPriceLock);
         }
     }
 
@@ -197,47 +190,6 @@ public class DynamicPriceService(IScheduleTaskService scheduleTaskService, IStor
     {
         await settingService.SaveSettingAsync(
             settings: new DynamicPriceSettings()
-        );
-    }
-
-    private async Task UpdateMetalTypeAsync(DynamicPricingMetalType pricingMetalType)
-    {
-        try
-        {
-            await logger.LogDebugAsync($"{pricingMetalType.ApiSymbol} price set at {pricingMetalType.CurrentValue} @ {DateTime.UtcNow:G} UTC");
-            await dynamicPricingRepository.UpdateMetalTypeAsync(pricingMetalType);
-        }
-        catch (Exception ex)
-        {
-            await logger.ErrorAsync(nameof(UpdateMetalTypeAsync), ex);
-        }
-    }
-    /// <summary>
-    /// Applies a temporary discount to a cart item if the dynamic price increases within a time specified by a the setting CartPriceLock
-    /// </summary>
-    public async Task InsertCartItemDiscountAsync(ShoppingCartItem cartItem, decimal newPrice, decimal oldPrice, int cartPriceLock)
-    {
-        var secondsInCart = (DateTime.UtcNow - cartItem.CreatedOnUtc).TotalSeconds;
-
-        if (oldPrice > newPrice || secondsInCart > cartPriceLock)
-        {
-            return;
-        }
-
-        var discountAmount = newPrice - oldPrice;
-
-        var discount = ObjectModelFactory.CreateDiscount(
-            discountAmount: discountAmount,
-            endDateUtc: cartItem.CreatedOnUtc.AddSeconds(cartPriceLock - secondsInCart),
-            adminComment: "Inserted via dynamic pricing",
-            name: $"discount product id: {cartItem.ProductId} for customer {cartItem.CustomerId} for {discountAmount}"
-        );
-
-        await discountService.InsertDiscountAsync(discount);
-        await productService.InsertDiscountProductMappingAsync(new() { EntityId = cartItem.ProductId, DiscountId = discount.Id });
-        await customerService.ApplyDiscountCouponCodeAsync(
-            customer: await customerService.GetCustomerByIdAsync(cartItem.CustomerId),
-            couponCode: discount.CouponCode
         );
     }
 
@@ -276,5 +228,57 @@ public class DynamicPriceService(IScheduleTaskService scheduleTaskService, IStor
         }
 
         return new();
+    }
+
+    private async Task UpdateMetalTypeAsync(DynamicPricingMetalType pricingMetalType)
+    {
+        try
+        {
+            await logger.LogDebugAsync($"{pricingMetalType.ApiSymbol} price set at {pricingMetalType.CurrentValue} @ {DateTime.UtcNow:G} UTC");
+            await dynamicPricingRepository.UpdateMetalTypeAsync(pricingMetalType);
+        }
+        catch (Exception ex)
+        {
+            await logger.ErrorAsync(nameof(UpdateMetalTypeAsync), ex);
+        }
+    }
+
+    private async Task UpdateDynamicallyPriceCartItemsAsync(int productId, decimal newPrice, decimal oldPrice, int cartPriceLock)
+    {
+        var cartItems = await shoppingCartRepository.GetCartItemsByProductId(productId);
+
+        foreach (var cartItem in cartItems)
+        {
+            var secondsInCart = cartItem.CreatedOnUtc.DeltaInSeconds();
+
+            cartItem.CustomerEnteredPrice = (secondsInCart > cartPriceLock)
+                ? 0
+                : (cartItem.CustomerEnteredPrice == decimal.Zero)
+                ? oldPrice
+                : 0;
+
+            await shoppingCartRepository.UpdateCartItem(cartItem);
+
+            if (cartItem.CustomerEnteredPrice == decimal.Zero || cartItem.CustomerEnteredPrice > newPrice)
+            {
+                return;
+            }
+
+            var discountAmount = newPrice - cartItem.CustomerEnteredPrice;
+
+            var discount = ObjectModelFactory.CreateDiscount(
+                discountAmount: discountAmount,
+                endDateUtc: cartItem.CreatedOnUtc.AddSeconds(cartPriceLock - secondsInCart),
+                adminComment: "Inserted via dynamic pricing",
+                name: $"discount product id: {cartItem.ProductId} for customer {cartItem.CustomerId} for {discountAmount}"
+            );
+
+            await discountService.InsertDiscountAsync(discount);
+            await productService.InsertDiscountProductMappingAsync(new() { EntityId = productId, DiscountId = discount.Id });
+            await customerService.ApplyDiscountCouponCodeAsync(
+                customer: await customerService.GetCustomerByIdAsync(cartItem.CustomerId),
+                couponCode: discount.CouponCode
+            );
+        }
     }
 }

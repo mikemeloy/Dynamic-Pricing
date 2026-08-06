@@ -5,6 +5,11 @@
   font-size: .8rem;
   border-bottom: 4px solid var(--accent-blue-active-color);
 
+  position: sticky;
+  top: 0;
+  background-color: #fff;
+  z-index: 15;
+
   section {
     display: flex;
     align-items: center;
