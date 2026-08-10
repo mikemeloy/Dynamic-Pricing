@@ -22,5 +22,11 @@ public class RouteProvider : IRouteProvider
             pattern: "dynamicprice/configure",
             defaults: new { controller = "dynamicprice", action = "SaveConfigure", area = AreaNames.ADMIN }
         );
+
+        endpointRouteBuilder.MapControllerRoute(
+            name: PluginDefaults.GetDynamicPriceValues,
+            pattern: "DynamicPrice/GetMetalValues",
+            defaults: new { controller = "DynamicPricePublic", action = "GetMetalValues" }
+        );
     }
 }

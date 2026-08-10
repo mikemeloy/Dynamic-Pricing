@@ -5,19 +5,19 @@ let
   _getUrl;
 
 const
-  init = ({ getUrl, secondsSinceLastUpdate, updateInterval }) => {
+  init = ({ getUrl, secondsSinceLastUpdate, cartPriceLock, getRoute }) => {
 
-    _getUrl = getUrl;
-    initTimer({ updateInterval, secondsSinceLastUpdate });
+    _getUrl = getRoute;
+    initTimer({ cartPriceLock, secondsSinceLastUpdate });
   },
-  initTimer = ({ updateInterval, secondsSinceLastUpdate }) => {
+  initTimer = ({ cartPriceLock, secondsSinceLastUpdate }) => {
     _banner = document.querySelector("[data-dynamic-price-banner]");
 
     const
       el = _banner.querySelector('[data-timer]');
 
     let
-      timer = updateInterval - secondsSinceLastUpdate,
+      timer = secondsSinceLastUpdate,
       minutes,
       seconds;
 
@@ -33,9 +33,9 @@ const
         el.textContent = `${minutes}:${seconds}`;
 
         if (--timer < 0) {
-          timer = updateInterval;
+          timer = secondsSinceLastUpdate;
           try {
-            await getNewMetalPrices(); 
+            await getNewMetalPrices();
           } catch (error) {
             console.error(error);
             clearInterval(interval);
@@ -46,7 +46,7 @@ const
   },
   getNewMetalPrices = async () => {
     const
-      response = await fetch("DynamicPrice/GetMetalValues"),
+      response = await fetch(_getUrl),
       metalTypes = await response.json();
 
     for (const { ApiSymbol, CurrentValue, PreviousValue } of metalTypes) {

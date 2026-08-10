@@ -9,7 +9,8 @@
     var silerSymbol = Model.SilverSymbol;
     var silverDelta = Model.SilverDelta;
     var secondsSinceLastUpdate = Model.SecondsSinceLastPriceUpdate;
-    var updateInterval = Model.CartPriceLock;
+    var cartPriceLock = Model.CartPriceLock;
+    var getValuesRoute = Url.RouteUrl(PluginDefaults.GetDynamicPriceValues);
 }
 
 <!link rel="stylesheet" href="/Plugins/i7MEDIA.Plugin.Misc.Dynamic.Pricing/Areas/Public/styles/banner.css?v=@version" />
@@ -18,7 +19,8 @@
 
     init({
         secondsSinceLastUpdate:@secondsSinceLastUpdate,
-        updateInterval: @updateInterval
+        cartPriceLock: @cartPriceLock,
+        getRoute: '@getValuesRoute'
     });
 </!script>
 <div data-dynamic-price-banner>

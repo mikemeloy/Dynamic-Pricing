@@ -1,10 +1,10 @@
 ﻿using i7MEDIA.Plugin.Misc.Core.Extentions;
 using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Data;
 using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Extensions;
-using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Factories;
 using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Repositories;
 using Nop.Core;
 using Nop.Core.Configuration;
+using Nop.Core.Domain.Customers;
 using Nop.Core.Domain.ScheduleTasks;
 using Nop.Services.Catalog;
 using Nop.Services.Configuration;
@@ -24,6 +24,9 @@ public interface IDynamicPriceService
     public Task DeleteMetalTypeAsync(int metalTypeId);
     public Task<IEnumerable<string>> GetMetalTypeSymbolsAsync();
     public Task UpdateMetalPrices(Dictionary<string, decimal> dicMetalValues);
+    /// <summary>
+    /// Updates the price of all items associated with a metal type based on [DynamicPricingMetalType] records
+    /// </summary> 
     public Task UpdateProductPricesByMetalType();
     public Task<T> GetSettingsAsync<T>() where T : ISettings, new();
     public Task InsertInitialSettings();
@@ -31,7 +34,7 @@ public interface IDynamicPriceService
     public Task<ScheduleTask> GetDynamicPriceScheduledTaskAsync();
 }
 
-public class DynamicPriceService(IScheduleTaskService scheduleTaskService, IStoreContext storeContext, ISettingService settingService, ILogger logger, IDynamicShoppingCartRepository shoppingCartRepository, IDynamicPricingRepository dynamicPricingRepository, IDiscountService discountService, ICustomerService customerService, IProductService productService) : IDynamicPriceService
+public class DynamicPriceService(IDynamicPriceTierPriceService dynamicPricePriceService, IScheduleTaskService scheduleTaskService, IStoreContext storeContext, ISettingService settingService, ILogger logger, IDynamicShoppingCartRepository shoppingCartRepository, IDynamicPricingRepository dynamicPricingRepository, IDiscountService discountService, ICustomerService customerService, IProductService productService) : IDynamicPriceService
 {
     public async Task<DynamicPricing> GetProductDynamicPriceByProductIdAsync(int productId)
     {
@@ -171,11 +174,10 @@ public class DynamicPriceService(IScheduleTaskService scheduleTaskService, IStor
             var newPrice = productInfo.CalculatePrice(currentValue: metalType.CurrentValue);
 
             product.Price = newPrice;
-            product.CustomerEntersPrice = false;
 
             await logger.LogDebugAsync($"Product {product.Name} (Id: {product.Id}) OldPrice: {oldPrice} NewPrice:{newPrice} @ {DateTime.UtcNow:G}");
-            await dynamicPricingRepository.UpdateProductAsync(product: product);
             await UpdateDynamicallyPriceCartItemsAsync(product.Id, newPrice, oldPrice, settings.CartPriceLock);
+            await dynamicPricingRepository.UpdateProductAsync(product: product);
         }
     }
 
@@ -250,35 +252,92 @@ public class DynamicPriceService(IScheduleTaskService scheduleTaskService, IStor
         foreach (var cartItem in cartItems)
         {
             var secondsInCart = cartItem.CreatedOnUtc.DeltaInSeconds();
+            var secondsLeftInLock = cartPriceLock - secondsInCart;
 
-            cartItem.CustomerEnteredPrice = (secondsInCart > cartPriceLock)
-                ? 0
-                : (cartItem.CustomerEnteredPrice == decimal.Zero)
-                ? oldPrice
-                : 0;
-
-            await shoppingCartRepository.UpdateCartItem(cartItem);
-
-            if (cartItem.CustomerEnteredPrice == decimal.Zero || cartItem.CustomerEnteredPrice > newPrice)
+            if (secondsLeftInLock <= decimal.Zero)
             {
-                return;
+                continue;
             }
 
-            var discountAmount = newPrice - cartItem.CustomerEnteredPrice;
+            var endDate = DateTime.UtcNow.AddSeconds(secondsLeftInLock);
 
-            var discount = ObjectModelFactory.CreateDiscount(
-                discountAmount: discountAmount,
-                endDateUtc: cartItem.CreatedOnUtc.AddSeconds(cartPriceLock - secondsInCart),
-                adminComment: "Inserted via dynamic pricing",
-                name: $"discount product id: {cartItem.ProductId} for customer {cartItem.CustomerId} for {discountAmount}"
+            await dynamicPricePriceService.AddTimedTierPriceAsync(
+                cartItemId: cartItem.Id,
+                customerId: cartItem.CustomerId,
+                productId: productId,
+                quantity: cartItem.Quantity,
+                endDateUtc: endDate,
+                price: oldPrice
             );
+        }
+    }
+}
 
-            await discountService.InsertDiscountAsync(discount);
-            await productService.InsertDiscountProductMappingAsync(new() { EntityId = productId, DiscountId = discount.Id });
-            await customerService.ApplyDiscountCouponCodeAsync(
-                customer: await customerService.GetCustomerByIdAsync(cartItem.CustomerId),
-                couponCode: discount.CouponCode
-            );
+
+
+
+public interface IDynamicPriceTierPriceService
+{
+    public Task AddTimedTierPriceAsync(int cartItemId, int customerId, decimal price, int productId, int quantity, DateTime endDateUtc, int storeId = 0);
+    /// <summary>
+    /// Removes any temporary roles created by dynamic pricing
+    /// </summary> 
+    public Task DynamicPriceRoleCleanupAsync();
+}
+
+public class DynamicPriceTierPriceService(ICustomerService customerService, IProductService productService, IDynamicPricingRepository dynamicPricingRepository) : IDynamicPriceTierPriceService
+{
+    public async Task AddTimedTierPriceAsync(int cartItemId, int customerId, decimal price, int productId, int quantity, DateTime endDateUtc, int storeId = 0)
+    {
+        var hasExistingMap = await dynamicPricingRepository.GetDynamicPriceMappingByCartItemId(cartItemId);
+
+        if (hasExistingMap)
+        {
+            return;
+        }
+
+        var role = new CustomerRole() { Active = true, Name = $"{Guid.NewGuid()}", SystemName = $"{Guid.NewGuid()}" };
+        await customerService.InsertCustomerRoleAsync(role);
+
+        await customerService.AddCustomerRoleMappingAsync(new()
+        {
+            CustomerId = customerId,
+            CustomerRoleId = role.Id
+        });
+
+        await productService.InsertTierPriceAsync(new()
+        {
+            CustomerRoleId = role.Id,
+            Price = price,
+            ProductId = productId,
+            Quantity = quantity,
+            StartDateTimeUtc = DateTime.UtcNow,
+            EndDateTimeUtc = endDateUtc,
+            StoreId = storeId
+        });
+
+        await dynamicPricingRepository.InsertDynamicPriceRoleMappingAsync(new()
+        {
+            RoleId = role.Id,
+            CustomerId = customerId,
+            CartItemId = cartItemId
+        });
+    }
+
+    public async Task DynamicPriceRoleCleanupAsync()
+    {
+        foreach (var mapping in await dynamicPricingRepository.GetExpiredDynamicPriceRolesAsync())
+        {
+            var role = await customerService.GetCustomerRoleByIdAsync(mapping.RoleId);
+            if (role.IsNull())
+            {
+                continue;
+            }
+
+            var customer = await customerService.GetCustomerByIdAsync(mapping.CustomerId);
+
+            await customerService.RemoveCustomerRoleMappingAsync(customer, role);
+            await customerService.DeleteCustomerRoleAsync(role);
         }
     }
 }

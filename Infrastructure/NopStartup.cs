@@ -24,5 +24,6 @@ public class NopStartup : INopStartup
         services.AddScoped<IDynamicPriceService, DynamicPriceService>();
         services.AddScoped<IDynamicPriceViewModelFactory, ViewModelFactory>();
         services.AddScoped<IMetalsService, MetalsService>();
+        services.AddScoped<IDynamicPriceTierPriceService, DynamicPriceTierPriceService>();
     }
 }

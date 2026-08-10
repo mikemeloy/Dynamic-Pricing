@@ -60,10 +60,7 @@ public static class Extensions
     /// <summary>
     /// Gets the difference between the source date and now in seconds
     /// </summary> 
-    public static int DeltaInSeconds(this DateTime source)
-    {
-        return Math.Max(0, Convert.ToInt32((DateTime.UtcNow - source).TotalSeconds));
-    }
+    public static int DeltaInSeconds(this DateTime source) => (int)(DateTime.UtcNow - source).TotalSeconds;
 
     public static async Task LogDebugAsync(this ILogger source, string message) => await source.InsertLogAsync(LogLevel.Debug, message);
 }

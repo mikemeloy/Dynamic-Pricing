@@ -19,9 +19,13 @@ public interface IDynamicPricingRepository
     public Task<List<DynamicPricedProduct>> GetProductsByMetalTypeAssociationAsync();
     public Task<Product> GetProductByIdAsync(int productId);
     public Task UpdateProductAsync(Product product);
+    public Task InsertDynamicPriceRoleMappingAsync(DynamicPriceRoleMapping roleMapping);
+    public Task DeleteDynamicPriceRoleMappingAsync(DynamicPriceRoleMapping roleMapping);
+    public Task<IList<DynamicPriceRoleMapping>> GetExpiredDynamicPriceRolesAsync();
+    public Task<bool> GetDynamicPriceMappingByCartItemId(int cartItemId);
 }
 
-public class DynamicPricingRepository(IRepository<DynamicPricingMetalType> metalTypeRepo, IRepository<DynamicPricing> dynamicPriceRepo, IRepository<Product> productRepo) : IDynamicPricingRepository
+public class DynamicPricingRepository(IRepository<TierPrice> tierPriceRepo, IRepository<DynamicPriceRoleMapping> roleMappingRepository, IRepository<DynamicPricingMetalType> metalTypeRepo, IRepository<DynamicPricing> dynamicPriceRepo, IRepository<Product> productRepo) : IDynamicPricingRepository
 {
     public async Task InsertDynamicPricingAsync(DynamicPricing dynamicPrice)
     {
@@ -119,5 +123,36 @@ public class DynamicPricingRepository(IRepository<DynamicPricingMetalType> metal
     public async Task UpdateProductAsync(Product product)
     {
         await productRepo.UpdateAsync(product);
+    }
+
+    public async Task<IList<DynamicPriceRoleMapping>> GetExpiredDynamicPriceRolesAsync()
+    {
+        return await roleMappingRepository.GetAllAsync(async mapping =>
+            from map in mapping
+            join tier in tierPriceRepo.Table on map.RoleId equals tier.CustomerRoleId
+            where tier.EndDateTimeUtc < DateTime.UtcNow
+            select map
+        );
+    }
+
+    public async Task InsertDynamicPriceRoleMappingAsync(DynamicPriceRoleMapping roleMapping)
+    {
+        await roleMappingRepository.InsertAsync(roleMapping);
+    }
+
+    public async Task DeleteDynamicPriceRoleMappingAsync(DynamicPriceRoleMapping roleMapping)
+    {
+        await roleMappingRepository.DeleteAsync(roleMapping);
+    }
+
+    public async Task<bool> GetDynamicPriceMappingByCartItemId(int cartItemId)
+    {
+        var result = await roleMappingRepository.GetAllAsync(async mapping =>
+           from map in mapping
+           where map.CartItemId == cartItemId
+           select map
+       );
+
+        return result.Any();
     }
 }
