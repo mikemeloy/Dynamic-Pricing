@@ -5,19 +5,19 @@ let
   _getUrl;
 
 const
-  init = ({ getUrl, secondsSinceLastUpdate, cartPriceLock, getRoute }) => {
+  init = ({ secondsSinceLastUpdate, getRoute, priceUpdateInterval }) => {
 
     _getUrl = getRoute;
-    initTimer({ cartPriceLock, secondsSinceLastUpdate });
+    initTimer({ priceUpdateInterval, secondsSinceLastUpdate });
   },
-  initTimer = ({ cartPriceLock, secondsSinceLastUpdate }) => {
+  initTimer = ({ priceUpdateInterval, secondsSinceLastUpdate }) => {
     _banner = document.querySelector("[data-dynamic-price-banner]");
 
     const
       el = _banner.querySelector('[data-timer]');
 
     let
-      timer = secondsSinceLastUpdate,
+      timer = priceUpdateInterval - secondsSinceLastUpdate,
       minutes,
       seconds;
 
@@ -33,7 +33,7 @@ const
         el.textContent = `${minutes}:${seconds}`;
 
         if (--timer < 0) {
-          timer = secondsSinceLastUpdate;
+          timer = priceUpdateInterval;
           try {
             await getNewMetalPrices();
           } catch (error) {

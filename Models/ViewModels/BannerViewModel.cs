@@ -11,4 +11,5 @@ public class BannerViewModel
     public decimal SilverDelta { get; set; }
     public required string GoldSymbol { get; set; }
     public required string SilverSymbol { get; set; }
+    public int PriceUpdateInterval { get; set; }
 }

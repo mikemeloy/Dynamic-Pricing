@@ -11,6 +11,7 @@
     var secondsSinceLastUpdate = Model.SecondsSinceLastPriceUpdate;
     var cartPriceLock = Model.CartPriceLock;
     var getValuesRoute = Url.RouteUrl(PluginDefaults.GetDynamicPriceValues);
+    var priceUpdateInterval = Model.PriceUpdateInterval;
 }
 
 <!link rel="stylesheet" href="/Plugins/i7MEDIA.Plugin.Misc.Dynamic.Pricing/Areas/Public/styles/banner.css?v=@version" />
@@ -18,9 +19,10 @@
     import {init} from '/Plugins/i7MEDIA.Plugin.Misc.Dynamic.Pricing/Areas/Public/scripts/banner.js?v=@version';
 
     init({
-        secondsSinceLastUpdate:@secondsSinceLastUpdate,
+        secondsSinceLastUpdate: @secondsSinceLastUpdate,
         cartPriceLock: @cartPriceLock,
-        getRoute: '@getValuesRoute'
+        getRoute: '@getValuesRoute',
+        priceUpdateInterval: @priceUpdateInterval
     });
 </!script>
 <div data-dynamic-price-banner>

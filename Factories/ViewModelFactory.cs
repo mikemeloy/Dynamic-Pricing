@@ -70,7 +70,8 @@ public class ViewModelFactory(IPluginService pluginService, IDynamicPriceService
             SilverDelta = silver.GetValueOrDefault(s => s.CurrentValue, 0.0m) - silver.GetValueOrDefault(s => s.PreviousValue, 0.0m),
             SilverSymbol = silver.GetValueOrDefault(s => s.ApiSymbol, ""),
             CartPriceLock = settings.CartPriceLock,
-            SecondsSinceLastPriceUpdate = scheduledTask.Seconds
+            SecondsSinceLastPriceUpdate = scheduledTask.LastSuccessUtc.DeltaInSeconds(),
+            PriceUpdateInterval = scheduledTask.Seconds
         };
     }
 
