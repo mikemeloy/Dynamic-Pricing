@@ -210,7 +210,8 @@ public class DynamicPriceService(IDynamicPriceTierPriceService dynamicPricePrice
                 WeightConversion = conversion,
                 CartPriceLock = cartPriceLockInSeconds,
                 GoldSymbol = settings.GoldSymbol,
-                SilverSymbol = settings.SilverSymbol
+                SilverSymbol = settings.SilverSymbol,
+                PlatinumSymbol = settings.PlatinumSymbol
             });
         }
         catch (Exception ex)

@@ -41,8 +41,9 @@ public class MetalsService(IStoreContext storeContext, ISettingService settingSe
             var rand = new Random();
             var goldValue = rand.Next(7000, 8000);
             var silverValue = rand.Next(500, 700);
+            var platinumValue = rand.Next(1000, 1200);
 
-            var content = $"{{\"success\":true,\"base\":\"USD\",\"timestamp\":1784764799,\"rates\":{{\"USDXAG\":{goldValue},\"USDXAU\":{silverValue},\"XAG\":0.0169528822,\"XAU\":0.0002444298}}}}";
+            var content = $"{{\"success\":true,\"base\":\"USD\",\"timestamp\":1784764799,\"rates\":{{\"USDXPT\":{platinumValue},\"USDXAG\":{goldValue},\"USDXAU\":{silverValue},\"XAG\":0.0169528822,\"XAU\":0.0002444298}}}}";
 #endif
             var apiResponse = JsonSerializer.Deserialize<PreciousMetalsApiResponse>(content);
 

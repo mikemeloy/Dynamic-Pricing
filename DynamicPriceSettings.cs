@@ -11,4 +11,5 @@ public class DynamicPriceSettings : Nop.Core.Configuration.ISettings
     public int CartPriceLock { get; set; } = 300;
     public string GoldSymbol { get; set; } = "XAG";
     public string SilverSymbol { get; set; } = "XAU";
+    public string PlatinumSymbol { get; set; } = "XPT";
 }

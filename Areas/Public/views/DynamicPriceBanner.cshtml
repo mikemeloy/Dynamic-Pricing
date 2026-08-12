@@ -2,12 +2,19 @@
 
 @{
     var version = Model.Version;
+
     var goldValue = Model.GoldPrice;
-    var silverValue = Model.SilverPrice;
     var goldDelta = Model.GoldDelta;
     var goldSymbol = Model.GoldSymbol;
-    var silerSymbol = Model.SilverSymbol;
+
+    var silverValue = Model.SilverPrice;
+    var silverSymbol = Model.SilverSymbol;
     var silverDelta = Model.SilverDelta;
+
+    var platValue = Model.PlatinumPrice;
+    var platSymbol = Model.PlatinumSymbol;
+    var platDelta = Model.PlatinumDelta;
+
     var secondsSinceLastUpdate = Model.SecondsSinceLastPriceUpdate;
     var cartPriceLock = Model.CartPriceLock;
     var getValuesRoute = Url.RouteUrl(PluginDefaults.GetDynamicPriceValues);
@@ -32,12 +39,24 @@
         <span data-positive="@(goldDelta > 0)"></span>
         <span data-delta>@goldDelta.ToCurrency()</span>
     </section>
-    <section data-metal-symbol="@silerSymbol">
+    <section data-metal-symbol="@silverSymbol">
         <span data-value-label> @T("admin.dynamic.price.banner.span.silver")</span>
         <span data-current>@silverValue.ToCurrency()</span>
         <span data-positive="@(silverDelta > 0)"></span>
         <span data-delta>@silverDelta.ToCurrency()</span>
     </section>
+
+    <section data-metal-symbol="@platSymbol">
+        <span data-value-label> @T("admin.dynamic.price.banner.span.platinum")</span>
+        <span data-current>@platValue.ToCurrency()</span>
+        <span data-positive="@(platDelta > 0)"></span>
+        <span data-delta>@platDelta.ToCurrency()</span>
+    </section>
+
+
+
+
+
     <section data-dynamic-price-timer>
         <span>@T("admin.dynamic.price.banner.label.timer")</span><span data-timer>--:--</span>
     </section>
