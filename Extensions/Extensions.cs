@@ -29,6 +29,7 @@ public static class Extensions
             MetalTypeId = source.MetalType,
             ProductId = source.ProductId,
             Weight = source.Weight,
+            Exclude = source.Exclude,
             PriceModifier = source.PriceModifier,
             PriceModifierTypeId = source.PriceModifierType
         };

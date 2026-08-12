@@ -7,10 +7,24 @@
 
     button {
         min-width: 4rem;
- 
+
         &:disabled {
             background-color: var(--gray);
             border-color: var(--gray);
+        }
+    }
+
+    section {
+        transition: opacity 500ms;
+    }
+
+    &:has(input:checked) {
+        section {
+            &:not(:has(input:checked)) {
+                opacity: .5;
+                user-select: none;
+                pointer-events: none;
+            }
         }
     }
 }

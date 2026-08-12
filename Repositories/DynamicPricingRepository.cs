@@ -106,6 +106,7 @@ public class DynamicPricingRepository(IRepository<TierPrice> tierPriceRepo, IRep
         return (from p in productRepo.Table
                 join d in dynamicPriceRepo.Table on p.Id equals d.ProductId
                 join mt in metalTypeRepo.Table on d.MetalTypeId equals mt.Id
+                where !p.Deleted && !d.Exclude
                 select new DynamicPricedProduct()
                 {
                     MetalSymbol = mt.ApiSymbol,

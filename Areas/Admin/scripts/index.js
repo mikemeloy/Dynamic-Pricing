@@ -24,24 +24,19 @@ const
             try {
                 const
                     formData = new FormData(),
-                    parent = document.querySelector('#dynamic-price-cards'),
-                    getFormValue = (selector) => {
-                        const el = parent.querySelector(selector);
-
-                        return el ? el.value : '';
-                    },
-                    metalType = getFormValue("#SelectedMetalType"),
-                    weight = getFormValue("#Weight"),
-                    basePrice = getFormValue("#BasePrice"),
-                    modifierType = getFormValue('#PriceModifierType'),
-                    modifierValue = getFormValue('#PriceModifier');
+                    container = document.querySelector('#dynamic-price-cards'),
+                    getFormValue = (selector, options = { bool: false }) => {
+                        const input = container.querySelector(selector);
+                        return options.bool ? input.checked : input.value;
+                    };
 
                 formData.append('ProductId', _productId);
-                formData.append('MetalType', metalType);
-                formData.append('BasePrice', basePrice);
-                formData.append('Weight', weight);
-                formData.append('PriceModifierType', modifierType);
-                formData.append('PriceModifier', modifierValue)
+                formData.append('MetalType', getFormValue("#SelectedMetalType"));
+                formData.append('BasePrice', getFormValue("#BasePrice"));
+                formData.append('Weight', getFormValue("#Weight"));
+                formData.append('PriceModifierType', getFormValue('#PriceModifierType'));
+                formData.append('PriceModifier', getFormValue('#PriceModifier'));
+                formData.append('Exclude', getFormValue('#Exclude', { bool: true }));
 
                 const
                     response = await fetch(_saveUrl, {

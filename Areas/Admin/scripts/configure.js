@@ -29,10 +29,12 @@ const events = {
             formData.append("WeightConversion", getValue("#WeightConversion"));
             formData.append("CartPriceLock", getValue("#CartPriceLock"));
 
-            const response = await fetch(_saveUrl, {
-                method: "POST",
-                body: formData
-            });
+            const
+                response = await fetch(_saveUrl, {
+                    method: "POST",
+                    body: formData
+                });
+
         } catch (error) {
             console.error(error);
         }

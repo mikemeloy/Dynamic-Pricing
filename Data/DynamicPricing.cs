@@ -22,4 +22,8 @@ public class DynamicPricing : BaseEntity
     public int UpdatedBy { get; set; }
     public DateTime CreatedOnUtc { get; set; }
     public DateTime UpdatedOnUtc { get; set; }
+    /// <summary>
+    /// Exclude the specified product from dynamic pricing engine updates
+    /// </summary>
+    public bool Exclude { get; set; }
 }

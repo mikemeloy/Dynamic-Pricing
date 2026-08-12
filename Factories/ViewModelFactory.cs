@@ -24,14 +24,13 @@ public class ViewModelFactory(IPluginService pluginService, IDynamicPriceService
         var metalTypes = await dynamicPriceService.GetMetalTypesAsync();
         var dynamicPriceInfo = await dynamicPriceService.GetProductDynamicPriceByProductIdAsync(productId);
 
-
-
         return new()
         {
             Version = await GetPluginVersionAsync(),
             BasePrice = dynamicPriceInfo.BasePrice,
             Weight = dynamicPriceInfo.Weight,
             ProductId = productId,
+            Exclude = dynamicPriceInfo.Exclude,
             SelectedMetalType = dynamicPriceInfo.MetalTypeId,
             AvailableMetalTypes = metalTypes.ToSelectItemList(
                 label: e => e.Name,

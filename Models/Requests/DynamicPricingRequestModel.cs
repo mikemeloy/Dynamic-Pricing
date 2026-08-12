@@ -8,4 +8,5 @@ public class DynamicPricingRequestModel
     public decimal Weight { get; set; }
     public decimal PriceModifier { get; set; }
     public int PriceModifierType { get; set; }
+    public bool Exclude { get; set; }
 }

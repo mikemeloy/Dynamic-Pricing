@@ -23,13 +23,20 @@
             <div class="card-body">
                 <section class="form-group row">
                     <header class="col-md-3">
+                        <nop-label asp-for="Exclude" />
+                    </header>
+                    <main class="col-md-9">
+                        <input asp-for="Exclude" type="checkbox" />
+                    </main>
+                </section>
+                <section class="form-group row">
+                    <header class="col-md-3">
                         <nop-label asp-for="SelectedMetalType" />
                     </header>
                     <main class="col-md-9">
                         <nop-select asp-for="SelectedMetalType" asp-items="Model.AvailableMetalTypes" asp-multiple="false" />
                     </main>
                 </section>
-
                 <section class="form-group row">
                     <header class="col-md-3">
                         <nop-label asp-for="BasePrice" />
@@ -46,8 +53,6 @@
                         <nop-editor asp-for="Weight" />
                     </main>
                 </section>
-
-
                 <section class="form-group row">
                     <header class="col-md-3">
                         <nop-label asp-for="PriceModifierType" />
@@ -56,8 +61,6 @@
                         <nop-select asp-for="PriceModifierType" asp-items="Model.PriceModifierTypes" asp-multiple="false" />
                     </main>
                 </section>
-
-
                 <section class="form-group row">
                     <header class="col-md-3">
                         <nop-label asp-for="PriceModifier" />
