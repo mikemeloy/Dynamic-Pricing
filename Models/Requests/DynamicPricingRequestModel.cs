@@ -6,4 +6,6 @@ public class DynamicPricingRequestModel
     public int MetalType { get; set; }
     public int ProductId { get; set; }
     public decimal Weight { get; set; }
+    public decimal PriceModifier { get; set; }
+    public int PriceModifierType { get; set; }
 }

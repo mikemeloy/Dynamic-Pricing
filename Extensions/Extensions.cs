@@ -1,5 +1,6 @@
 ﻿using i7MEDIA.Plugin.Misc.Core.Extentions;
 using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Data;
+using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Enums;
 using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Models.Common;
 using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Models.Requests;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -27,7 +28,9 @@ public static class Extensions
             BasePrice = source.BasePrice,
             MetalTypeId = source.MetalType,
             ProductId = source.ProductId,
-            Weight = source.Weight
+            Weight = source.Weight,
+            PriceModifier = source.PriceModifier,
+            PriceModifierTypeId = source.PriceModifierType
         };
     }
 
@@ -43,7 +46,16 @@ public static class Extensions
             return 0m;
         }
 
-        return Math.Max(source.BasePrice, source.Weight * currentValue);
+        var basedOnWeightPrice = source.Weight * currentValue;
+        var modifierBasedPrice = source.PriceModifierTypeId switch
+        {
+            DynamicPriceModifierType.None => basedOnWeightPrice,
+            DynamicPriceModifierType.Percentage => (basedOnWeightPrice * (source.PriceModifier / 100)) + basedOnWeightPrice,
+            DynamicPriceModifierType.CostPlus => basedOnWeightPrice + source.PriceModifier,
+            _ => basedOnWeightPrice,
+        };
+
+        return Math.Max(source.BasePrice, modifierBasedPrice);
     }
     /// <summary>
     /// Gets the difference between the source date and now in seconds

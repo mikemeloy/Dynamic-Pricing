@@ -1,5 +1,7 @@
 ﻿using i7MEDIA.Plugin.Misc.Core.Extentions;
+using i7MEDIA.Plugin.Misc.Core.Helpers;
 using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Data;
+using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Enums;
 using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Models.Common;
 using Nop.Core.Domain.Catalog;
 using Nop.Data;
@@ -109,7 +111,9 @@ public class DynamicPricingRepository(IRepository<TierPrice> tierPriceRepo, IRep
                     MetalSymbol = mt.ApiSymbol,
                     BasePrice = d.BasePrice,
                     Weight = d.Weight,
-                    Product = p
+                    Product = p,
+                    PriceModifier = d.PriceModifier,
+                    PriceModifierTypeId = EnumHelper.ToEnum<DynamicPriceModifierType>(d.PriceModifierTypeId)
                 }).ToList();
     }
 

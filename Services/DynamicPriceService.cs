@@ -76,6 +76,8 @@ public class DynamicPriceService(IDynamicPriceTierPriceService dynamicPricePrice
                 existing.BasePrice = pricing.BasePrice;
                 existing.Weight = pricing.Weight;
                 existing.UpdatedBy = -1;
+                existing.PriceModifierTypeId = pricing.PriceModifierTypeId;
+                existing.PriceModifier = pricing.PriceModifier;
 
                 await dynamicPricingRepository.UpdateDynamicPricingAsync(existing);
                 return;

@@ -1,4 +1,5 @@
-﻿using Nop.Core.Domain.Catalog;
+﻿using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Enums;
+using Nop.Core.Domain.Catalog;
 
 namespace i7MEDIA.Plugin.Misc.Dynamic.Pricing.Models.Common;
 
@@ -8,4 +9,6 @@ public class DynamicPricedProduct
     public required Product Product { get; set; }
     public decimal BasePrice { get; set; }
     public decimal Weight { get; set; }
+    public decimal PriceModifier { get; set; }
+    public DynamicPriceModifierType PriceModifierTypeId { get; set; }
 }

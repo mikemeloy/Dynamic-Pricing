@@ -78,7 +78,9 @@ public class Plugin(ILocalizationService localizationService, IDynamicPriceServi
             ["admin.dynamic.price.configure.cart.lock"] = "Cart Lock",
             ["admin.dynamic.price.banner.label.gold"] = "Gold",
             ["admin.dynamic.price.banner.label.silver"] = "Silver",
-            ["admin.dynamic.price.banner.label.timer"] = "Time Left:"
+            ["admin.dynamic.price.banner.label.timer"] = "Time Left:",
+            ["Admin.Dynamic.Price.Label.Price.Modifier.Type"] = "Modifier Type",
+            ["admin.dynamic.price.label.price.modifier"] = "Modifier Value"
         });
     }
 

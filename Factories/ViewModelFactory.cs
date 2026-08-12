@@ -1,4 +1,6 @@
 ﻿using i7MEDIA.Plugin.Misc.Core.Extentions;
+using i7MEDIA.Plugin.Misc.Core.Helpers;
+using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Enums;
 using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Extensions;
 using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Models.ViewModels;
 using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Services;
@@ -22,6 +24,8 @@ public class ViewModelFactory(IPluginService pluginService, IDynamicPriceService
         var metalTypes = await dynamicPriceService.GetMetalTypesAsync();
         var dynamicPriceInfo = await dynamicPriceService.GetProductDynamicPriceByProductIdAsync(productId);
 
+
+
         return new()
         {
             Version = await GetPluginVersionAsync(),
@@ -32,7 +36,10 @@ public class ViewModelFactory(IPluginService pluginService, IDynamicPriceService
             AvailableMetalTypes = metalTypes.ToSelectItemList(
                 label: e => e.Name,
                 value: e => e.Id.ToString()
-            )
+            ),
+            PriceModifier = dynamicPriceInfo.PriceModifier,
+            PriceModifierType = dynamicPriceInfo.PriceModifierTypeId,
+            PriceModifierTypes = EnumHelper.GetEnumSelectList<DynamicPriceModifierType>()
         };
     }
 
@@ -57,7 +64,7 @@ public class ViewModelFactory(IPluginService pluginService, IDynamicPriceService
         var settings = await dynamicPriceService.GetSettingsAsync<DynamicPriceSettings>();
         var scheduledTask = await dynamicPriceService.GetDynamicPriceScheduledTaskAsync();
 
-        var gold = values.FirstOrDefault(x => x.ApiSymbol == settings.GoldSymbol);
+        var gold = values.FirstOrDefault(g => g.ApiSymbol == settings.GoldSymbol);
         var silver = values.FirstOrDefault(s => s.ApiSymbol == settings.SilverSymbol);
 
         return new()
