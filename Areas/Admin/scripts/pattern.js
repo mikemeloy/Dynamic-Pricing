@@ -1,17 +1,14 @@
 ﻿let
-  _productId,
   _saveUrl;
 
 const
-  init = ({ productId, saveRoute }) => {
+  init = ({ saveRoute }) => {
     _saveUrl = saveRoute;
-    _productId = productId
     setPageEvent();
   },
   setPageEvent = () => {
     const
-      parent = document.querySelector('#dynamic-price-cards'),
-      save = parent.querySelector('footer button');
+      save = document.querySelector('[data-dynamic-price-save]');
 
     save.addEventListener('click', event.onSave_Click);
   }
@@ -23,23 +20,17 @@ const
 
       try {
         const
-          formData = new FormData(),
-          container = document.querySelector('#dynamic-price-cards'),
-          getFormValue = (selector, options = { bool: false }) => {
-            const input = container.querySelector(selector);
-            return options.bool ? input.checked : input.value;
-          };
+          formData = new FormData();
 
-        formData.append('ProductId', _productId);
-        formData.append('MetalType', getFormValue("#SelectedMetalType"));
-        formData.append('PriceModifierType', getFormValue('#PriceModifierType'));
-        formData.append('PriceModifier', getFormValue('#PriceModifier'));
-
+        formData.append('PatternIds', selectedIds);
+ 
         const
           response = await fetch(_saveUrl, {
             method: "POST",
             body: formData
           });
+
+        console.table(response);
 
       } catch (error) {
         console.error(error);

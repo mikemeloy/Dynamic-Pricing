@@ -42,16 +42,14 @@ public class DynamicPriceController(IDynamicPriceService dynamicPriceService, ID
     [AuthorizeAdmin]
     [Area(AreaNames.ADMIN)]
     [HttpPost]
-    public async Task<IActionResult> SavePatternAsync(DynamicPricingRequestModel requestObject)
+    public async Task<IActionResult> SetPatternAsDynamicallyPricedAsync(IEnumerable<int> patternIds)
     {
-        if (requestObject.IsNull())
+        if (patternIds.IsNull())
         {
             return StatusCode((int)HttpStatusCode.BadRequest);
         }
 
-        await dynamicPriceService.SaveDynamicPricingAsync(
-            dynamicPricing: requestObject.ToDynamicPriceEntity()
-        );
+        await dynamicPriceService.SetPatternProductsAsDyanamicallyPricedAsync(patternIds);
 
         return StatusCode((int)HttpStatusCode.OK);
     }

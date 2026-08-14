@@ -8,11 +8,14 @@ const
   sourceRoot = '../',
   destinationRoot = 'C:/Repos/nopCommerce_4.90.0/Clean/src/Presentation/Nop.Web/Plugins/i7MEDIA.Plugin.Misc.Dynamic.Pricing/Areas/Admin',
   files = [
-    '/Scripts/index.js',
-    '/Styles/index.css',
+    '/Scripts/product.js',
+    '/Styles/product.css',
+    '/Scripts/pattern.js',
+    '/Styles/pattern.css',
     '/Scripts/configure.js',
     '/Styles/configure.css',
     '/Views/_product.dynamic.price.cshtml',
+    '/Views/_pattern.dynamic.price.cshtml',
     '/Views/configure.cshtml'
   ]
 
