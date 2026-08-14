@@ -21,7 +21,7 @@ public static class Extensions
                 }).ToList();
     }
 
-    public static DynamicPricing ToDynamicPriceEntity(this DynamicPricingRequestModel source)
+    public static DynamicProductPricing ToDynamicPriceEntity(this DynamicPricingRequestModel source)
     {
         return new()
         {

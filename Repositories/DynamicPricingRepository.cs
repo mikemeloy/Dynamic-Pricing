@@ -10,14 +10,14 @@ namespace i7MEDIA.Plugin.Misc.Dynamic.Pricing.Repositories;
 
 public interface IDynamicPricingRepository
 {
-    public Task InsertDynamicPricingAsync(DynamicPricing dynamicPrice);
-    public Task UpdateDynamicPricingAsync(DynamicPricing dynamicPrice);
+    public Task InsertDynamicPricingAsync(DynamicProductPricing dynamicPrice);
+    public Task UpdateDynamicPricingAsync(DynamicProductPricing dynamicPrice);
     public Task<IList<DynamicPricingMetalType>> GetMetalTypesAsync();
-    public Task<DynamicPricing?> GetDynamicPricingByProductIdAsync(int productId);
+    public Task<DynamicProductPricing?> GetDynamicPricingByProductIdAsync(int productId);
     public Task InsertMetalTypeAsync(DynamicPricingMetalType metalType);
     public Task UpdateMetalTypeAsync(DynamicPricingMetalType pricingMetalType);
     public Task DeleteMetalTypeAsync(int metalTypeId);
-    public Task<IList<DynamicPricing>> GetAllDynamicPricingItemsAsync();
+    public Task<IList<DynamicProductPricing>> GetAllDynamicPricingItemsAsync();
     public Task<List<DynamicPricedProduct>> GetProductsByMetalTypeAssociationAsync();
     public Task<Product> GetProductByIdAsync(int productId);
     public Task UpdateProductAsync(Product product);
@@ -27,15 +27,15 @@ public interface IDynamicPricingRepository
     public Task<bool> GetDynamicPriceMappingByCartItemId(int cartItemId);
 }
 
-public class DynamicPricingRepository(IRepository<TierPrice> tierPriceRepo, IRepository<DynamicPriceRoleMapping> roleMappingRepository, IRepository<DynamicPricingMetalType> metalTypeRepo, IRepository<DynamicPricing> dynamicPriceRepo, IRepository<Product> productRepo) : IDynamicPricingRepository
+public class DynamicPricingRepository(IRepository<TierPrice> tierPriceRepo, IRepository<DynamicPriceRoleMapping> roleMappingRepository, IRepository<DynamicPricingMetalType> metalTypeRepo, IRepository<DynamicProductPricing> dynamicPriceRepo, IRepository<Product> productRepo) : IDynamicPricingRepository
 {
-    public async Task InsertDynamicPricingAsync(DynamicPricing dynamicPrice)
+    public async Task InsertDynamicPricingAsync(DynamicProductPricing dynamicPrice)
     {
         dynamicPrice.UpdatedOnUtc = dynamicPrice.CreatedOnUtc = DateTime.UtcNow;
         await dynamicPriceRepo.InsertAsync(dynamicPrice);
     }
 
-    public async Task UpdateDynamicPricingAsync(DynamicPricing dynamicPrice)
+    public async Task UpdateDynamicPricingAsync(DynamicProductPricing dynamicPrice)
     {
         dynamicPrice.UpdatedOnUtc = DateTime.UtcNow;
         await dynamicPriceRepo.UpdateAsync(dynamicPrice);
@@ -50,7 +50,7 @@ public class DynamicPricingRepository(IRepository<TierPrice> tierPriceRepo, IRep
         );
     }
 
-    public async Task<IList<DynamicPricing>> GetAllDynamicPricingItemsAsync()
+    public async Task<IList<DynamicProductPricing>> GetAllDynamicPricingItemsAsync()
     {
         return await dynamicPriceRepo.GetAllAsync(async dynamicPrices =>
        {
@@ -59,7 +59,7 @@ public class DynamicPricingRepository(IRepository<TierPrice> tierPriceRepo, IRep
        });
     }
 
-    public async Task<DynamicPricing?> GetDynamicPricingByProductIdAsync(int productId)
+    public async Task<DynamicProductPricing?> GetDynamicPricingByProductIdAsync(int productId)
     {
         return (await dynamicPriceRepo.GetAllAsync(async dynamicPrices =>
         {

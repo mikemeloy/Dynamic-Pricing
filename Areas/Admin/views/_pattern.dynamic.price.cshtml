@@ -1,14 +1,14 @@
-@model AdminProductViewModel
+﻿@model AdminProductViewModel
 
 @{
     var version = Model.Version;
     var productId = Model.ProductId;
-    var saveRoute = Url.RouteUrl(PluginDefaults.SaveProductDynamicPrice);
+    var saveRoute = Url.RouteUrl(PluginDefaults.SavePatternDynamicPrice);
 }
 
-<!link rel="stylesheet" href="/Plugins/i7MEDIA.Plugin.Misc.Dynamic.Pricing/Areas/Admin/Styles/product.css?v=@version" />
+<!link rel="stylesheet" href="/Plugins/i7MEDIA.Plugin.Misc.Dynamic.Pricing/Areas/Admin/Styles/pattern.css?v=@version" />
 <!script type="module">
-    import {init} from '/Plugins/i7MEDIA.Plugin.Misc.Dynamic.Pricing/Areas/Admin/Scripts/product.js?v=@version';
+    import {init} from '/Plugins/i7MEDIA.Plugin.Misc.Dynamic.Pricing/Areas/Admin/Scripts/pattern.js?v=@version';
 
     init({productId: '@productId', saveRoute: '@saveRoute'});
 </!script>
@@ -23,34 +23,10 @@
             <div class="card-body">
                 <section class="form-group row">
                     <header class="col-md-3">
-                        <nop-label asp-for="Exclude" />
-                    </header>
-                    <main class="col-md-9">
-                        <input asp-for="Exclude" type="checkbox" />
-                    </main>
-                </section>
-                <section class="form-group row">
-                    <header class="col-md-3">
                         <nop-label asp-for="SelectedMetalType" />
                     </header>
                     <main class="col-md-9">
                         <nop-select asp-for="SelectedMetalType" asp-items="Model.AvailableMetalTypes" asp-multiple="false" />
-                    </main>
-                </section>
-                <section class="form-group row">
-                    <header class="col-md-3">
-                        <nop-label asp-for="BasePrice" />
-                    </header>
-                    <main class="col-md-9">
-                        <nop-editor asp-for="BasePrice" />
-                    </main>
-                </section>
-                <section class="form-group row">
-                    <header class="col-md-3">
-                        <nop-label asp-for="Weight" />
-                    </header>
-                    <main class="col-md-9">
-                        <nop-editor asp-for="Weight" />
                     </main>
                 </section>
                 <section class="form-group row">

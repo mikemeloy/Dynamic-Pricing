@@ -1,4 +1,5 @@
 ﻿using i7MEDIA.Plugin.Misc.Core.Extentions;
+using i7MEDIA.Plugin.Misc.Core.WidgetZones;
 using i7MEDIA.Plugin.Misc.Dynamic.Pricing;
 using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Components;
 using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Services;
@@ -44,7 +45,8 @@ public class Plugin(ILocalizationService localizationService, IDynamicPriceServi
     {
         return Task.FromResult<IList<string>>(new List<string> {
             AdminWidgetZones.ProductDetailsBlock,
-            PublicWidgetZones.BodyStartHtmlTagAfter
+            PublicWidgetZones.BodyStartHtmlTagAfter,
+            PatternWidgetZones.PatternListButtons
         });
     }
 
@@ -58,6 +60,11 @@ public class Plugin(ILocalizationService localizationService, IDynamicPriceServi
         if (widgetZone == PublicWidgetZones.BodyStartHtmlTagAfter)
         {
             return typeof(DynamicPriceBannerComponent);
+        }
+
+        if (widgetZone == PatternWidgetZones.PatternListButtons)
+        {
+            return typeof(DynamicPricingPatternComponent);
         }
 
         return typeof(DynamicPricingProductComponent);

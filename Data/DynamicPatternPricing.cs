@@ -2,17 +2,12 @@
 
 namespace i7MEDIA.Plugin.Misc.Dynamic.Pricing.Data;
 
-public class DynamicPricing : BaseEntity
+public class DynamicPatternPricing : BaseEntity
 {
-    public decimal BasePrice { get; set; }
     /// <summary>
-    /// Weight of the precious metal content in troy ounce (oz t)
+    /// FK Pattern
     /// </summary>
-    public decimal Weight { get; set; }
-    /// <summary>
-    /// FK Product
-    /// </summary>
-    public int ProductId { get; set; }
+    public int PatternId { get; set; }
     /// <summary>
     /// FK DynamicPricingMetalType
     /// </summary>
@@ -22,8 +17,4 @@ public class DynamicPricing : BaseEntity
     public int UpdatedBy { get; set; }
     public DateTime CreatedOnUtc { get; set; }
     public DateTime UpdatedOnUtc { get; set; }
-    /// <summary>
-    /// Exclude the specified product from dynamic pricing engine updates
-    /// </summary>
-    public bool Exclude { get; set; }
 }

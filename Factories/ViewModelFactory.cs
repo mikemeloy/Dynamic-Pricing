@@ -42,6 +42,26 @@ public class ViewModelFactory(IPluginService pluginService, IDynamicPriceService
         };
     }
 
+    public async Task<AdminPatternViewModel> GetAdminPatternViewModel(int patternId)
+    {
+        var metalTypes = await dynamicPriceService.GetMetalTypesAsync();
+        var dynamicPriceInfo = await dynamicPriceService.GetPatternDynamicPriceByPatternIdAsync(patternId);
+
+        return new()
+        {
+            Version = await GetPluginVersionAsync(),
+            PatternId = patternId,
+            SelectedMetalType = dynamicPriceInfo.MetalTypeId,
+            AvailableMetalTypes = metalTypes.ToSelectItemList(
+                label: e => e.Name,
+                value: e => e.Id.ToString()
+            ),
+            PriceModifier = dynamicPriceInfo.PriceModifier,
+            PriceModifierType = dynamicPriceInfo.PriceModifierTypeId,
+            PriceModifierTypes = EnumHelper.GetEnumSelectList<DynamicPriceModifierType>()
+        };
+    }
+
     public async Task<ConfigureViewModel> GetAdminConfigureViewModel()
     {
         var settings = await dynamicPriceService.GetSettingsAsync<DynamicPriceSettings>();

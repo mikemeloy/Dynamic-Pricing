@@ -25,7 +25,24 @@ public class DynamicPriceController(IDynamicPriceService dynamicPriceService, ID
     [AuthorizeAdmin]
     [Area(AreaNames.ADMIN)]
     [HttpPost]
-    public async Task<IActionResult> SaveAsync(DynamicPricingRequestModel requestObject)
+    public async Task<IActionResult> SaveProductAsync(DynamicPricingRequestModel requestObject)
+    {
+        if (requestObject.IsNull())
+        {
+            return StatusCode((int)HttpStatusCode.BadRequest);
+        }
+
+        await dynamicPriceService.SaveDynamicPricingAsync(
+            dynamicPricing: requestObject.ToDynamicPriceEntity()
+        );
+
+        return StatusCode((int)HttpStatusCode.OK);
+    }
+
+    [AuthorizeAdmin]
+    [Area(AreaNames.ADMIN)]
+    [HttpPost]
+    public async Task<IActionResult> SavePatternAsync(DynamicPricingRequestModel requestObject)
     {
         if (requestObject.IsNull())
         {

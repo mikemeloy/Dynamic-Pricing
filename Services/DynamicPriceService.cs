@@ -5,10 +5,7 @@ using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Repositories;
 using Nop.Core;
 using Nop.Core.Configuration;
 using Nop.Core.Domain.ScheduleTasks;
-using Nop.Services.Catalog;
 using Nop.Services.Configuration;
-using Nop.Services.Customers;
-using Nop.Services.Discounts;
 using Nop.Services.Logging;
 using Nop.Services.ScheduleTasks;
 
@@ -16,9 +13,9 @@ namespace i7MEDIA.Plugin.Misc.Dynamic.Pricing.Services;
 
 public interface IDynamicPriceService
 {
-    public Task SaveDynamicPricingAsync(DynamicPricing dynamicPricing);
+    public Task SaveDynamicPricingAsync(DynamicProductPricing dynamicPricing);
     public Task<IEnumerable<DynamicPricingMetalType>> GetMetalTypesAsync();
-    public Task<DynamicPricing> GetProductDynamicPriceByProductIdAsync(int productId);
+    public Task<DynamicProductPricing> GetProductDynamicPriceByProductIdAsync(int productId);
     public Task InsertMetalTypeAsync(DynamicPricingMetalType dynamicPricingMetalType);
     public Task DeleteMetalTypeAsync(int metalTypeId);
     public Task<IEnumerable<string>> GetMetalTypeSymbolsAsync();
@@ -31,11 +28,12 @@ public interface IDynamicPriceService
     public Task InsertInitialSettings();
     public Task SaveSettingsAsync(decimal conversion, string apiKey, string endpoint, int cartPriceLockInSeconds);
     public Task<ScheduleTask> GetDynamicPriceScheduledTaskAsync();
+    public Task<DynamicPatternPricing> GetPatternDynamicPriceByPatternIdAsync(int patternId);
 }
 
-public class DynamicPriceService(IDynamicPriceTierPriceService dynamicPricePriceService, IScheduleTaskService scheduleTaskService, IStoreContext storeContext, ISettingService settingService, ILogger logger, IDynamicShoppingCartRepository shoppingCartRepository, IDynamicPricingRepository dynamicPricingRepository, IDiscountService discountService, ICustomerService customerService, IProductService productService) : IDynamicPriceService
+public class DynamicPriceService(IDynamicPriceTierPriceService dynamicPricePriceService, IScheduleTaskService scheduleTaskService, IStoreContext storeContext, ISettingService settingService, ILogger logger, IDynamicShoppingCartRepository shoppingCartRepository, IDynamicPricingRepository dynamicPricingRepository) : IDynamicPriceService
 {
-    public async Task<DynamicPricing> GetProductDynamicPriceByProductIdAsync(int productId)
+    public async Task<DynamicProductPricing> GetProductDynamicPriceByProductIdAsync(int productId)
     {
         try
         {
@@ -63,7 +61,7 @@ public class DynamicPriceService(IDynamicPriceTierPriceService dynamicPricePrice
         return new();
     }
 
-    public async Task SaveDynamicPricingAsync(DynamicPricing pricing)
+    public async Task SaveDynamicPricingAsync(DynamicProductPricing pricing)
     {
         try
         {
@@ -273,5 +271,12 @@ public class DynamicPriceService(IDynamicPriceTierPriceService dynamicPricePrice
                 price: oldPrice
             );
         }
+    }
+
+    public async Task<DynamicPatternPricing> GetPatternDynamicPriceByPatternIdAsync(int patternId)
+    {
+
+
+        return new();
     }
 }
