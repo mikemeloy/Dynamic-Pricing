@@ -23,7 +23,7 @@ public interface IDynamicPricingRepository
     public Task<Product> GetProductByIdAsync(int productId);
     public Task UpdateProductAsync(Product product);
     public Task InsertDynamicPriceRoleMappingAsync(DynamicPriceRoleMapping roleMapping);
-    public Task DeleteDynamicPriceRoleMappingAsync(DynamicPriceRoleMapping roleMapping);
+    public Task DeleteDynamicPriceRoleMappingAsync(int roleId);
     public Task<IList<DynamicPriceRoleMapping>> GetExpiredDynamicPriceRolesAsync();
     public Task<bool> GetDynamicPriceMappingByCartItemId(int cartItemId);
     public Task<IEnumerable<Product>> GetPatternProductsbyIdAsync(int patternId);
@@ -147,9 +147,18 @@ public class DynamicPricingRepository(IRepository<PatternProductMapping> product
         await roleMappingRepository.InsertAsync(roleMapping);
     }
 
-    public async Task DeleteDynamicPriceRoleMappingAsync(DynamicPriceRoleMapping roleMapping)
+    public async Task DeleteDynamicPriceRoleMappingAsync(int roleId)
     {
-        await roleMappingRepository.DeleteAsync(roleMapping);
+        var mapping = await (from m in roleMappingRepository.Table
+                             where m.RoleId == roleId
+                             select m).FirstOrDefaultAsync();
+
+        if (mapping.IsNull())
+        {
+            return;
+        }
+
+        await roleMappingRepository.DeleteAsync(mapping);
     }
 
     public async Task<bool> GetDynamicPriceMappingByCartItemId(int cartItemId)

@@ -12,7 +12,6 @@ public class SchemeInstall : Migration
     private readonly string _dynamicProductPricing = NameCompatibilityManager.GetTableName(typeof(DynamicProductPricing));
     private readonly string _metalTypes = NameCompatibilityManager.GetTableName(typeof(DynamicPricingMetalType));
     private readonly string _dynamicPriceRoles = NameCompatibilityManager.GetTableName(typeof(DynamicPriceRoleMapping));
-    private readonly string _dynamicPatternPricing = NameCompatibilityManager.GetTableName(typeof(DynamicPatternPricing));
 
     public override void Up()
     {
@@ -28,11 +27,6 @@ public class SchemeInstall : Migration
             //.OnTable(nameof(DynamicPricing))
             //.OnColumn(nameof(DynamicPricing.MetalTypeId));
 
-        }
-
-        if (!Schema.Table(_dynamicPatternPricing).Exists())
-        {
-            Create.TableFor<DynamicPatternPricing>();
         }
 
         if (!Schema.Table(_metalTypes).Exists())
@@ -52,11 +46,6 @@ public class SchemeInstall : Migration
         if (Schema.Table(_dynamicProductPricing).Exists())
         {
             Delete.Table(_dynamicProductPricing);
-        }
-
-        if (Schema.Table(_dynamicPatternPricing).Exists())
-        {
-            Delete.Table(_dynamicPatternPricing);
         }
 #endif
     }

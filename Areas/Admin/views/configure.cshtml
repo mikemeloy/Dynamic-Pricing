@@ -1,12 +1,4 @@
 ﻿@model ConfigureViewModel
-@inherits Nop.Web.Framework.Mvc.Razor.NopRazorPage<TModel>
-@using Nop.Web.Framework.UI
-@using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Models.ViewModels
-@using i7MEDIA.Plugin.Misc.Dynamic.Pricing
-@inject INopHtmlHelper NopHtml
-@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
-@addTagHelper *, Nop.Web.Framework
-
 
 @{
     Layout = "_ConfigurePlugin";
@@ -22,7 +14,6 @@
     init({saveRoute: '@saveRoute'});
 </!script>
 <div data-container-configure>
-
     <main>
         <nop-label asp-for="WeightConversion" />
         <nop-editor asp-for="WeightConversion" />
@@ -40,6 +31,5 @@
         <button type="button" data-save class="btn btn-success">
             @T("Admin.Dynamic.Price.Save")
         </button>
-
-    </section>
+    </footer>
 </div>

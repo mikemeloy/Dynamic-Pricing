@@ -22,6 +22,7 @@
 }
 
 <!link rel="stylesheet" href="/Plugins/i7MEDIA.Plugin.Misc.Dynamic.Pricing/Areas/Public/styles/banner.css?v=@version" />
+
 <!script type="module">
     import {init} from '/Plugins/i7MEDIA.Plugin.Misc.Dynamic.Pricing/Areas/Public/scripts/banner.js?v=@version';
 
@@ -32,6 +33,7 @@
         priceUpdateInterval: @priceUpdateInterval
     });
 </!script>
+
 <div data-dynamic-price-banner>
     <section data-metal-symbol="@goldSymbol">
         <span data-value-label>@T("admin.dynamic.price.banner.span.gold")</span>
@@ -52,10 +54,6 @@
         <span data-positive="@(platDelta > 0)"></span>
         <span data-delta>@platDelta.ToCurrency()</span>
     </section>
-
-
-
-
 
     <section data-dynamic-price-timer>
         <span>@T("admin.dynamic.price.banner.label.timer")</span><span data-timer>--:--</span>
