@@ -8,7 +8,6 @@ public class UpdatePreciousMetalPrices(IDynamicPriceTierPriceService dynamicPric
 {
     public async Task ExecuteAsync()
     {
-
         var dicMetalValues = await metalsService.GetCurrentMetalPricesAsync();
 
         if (dicMetalValues.IsNull())

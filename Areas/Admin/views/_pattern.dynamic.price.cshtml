@@ -1,0 +1,18 @@
+﻿@model AdminPatternListButtonViewModel
+
+@{
+    var version = Model.Version;
+    var saveRoute = Url.RouteUrl(PluginDefaults.SaveDynamicPricePatternList);
+}
+
+<!link rel="stylesheet" href="/Plugins/i7MEDIA.Plugin.Misc.Dynamic.Pricing/Areas/Admin/Styles/pattern.css?v=@version" />
+<!script type="module">
+    import {init} from '/Plugins/i7MEDIA.Plugin.Misc.Dynamic.Pricing/Areas/Admin/Scripts/pattern.js?v=@version';
+
+    init({ saveRoute: '@saveRoute'});
+</!script>
+
+<button type="button" data-dynamic-price-save class="btn btn-danger">
+    <i class="far fa-dollar"></i>
+    @T("Admin.Dynamic.Price.Pattern.Button.Save")
+</button>

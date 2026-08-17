@@ -3,10 +3,11 @@ let
     _saveUrl;
 
 const
-    init = ({ productId, saveRoute }) => {
+    init = ({ productId, saveRoute, selectedMetalType, errorMessage, isExcluded }) => {
         _saveUrl = saveRoute;
         _productId = productId
         setPageEvent();
+        setPageWarning({ selectedMetalType, errorMessage, isExcluded });
     },
     setPageEvent = () => {
         const
@@ -14,6 +15,15 @@ const
             save = parent.querySelector('footer button');
 
         save.addEventListener('click', event.onSave_Click);
+    },
+    setPageWarning = ({ selectedMetalType, errorMessage, isExcluded }) => {
+        var dynamicPricingIsSetup = selectedMetalType !== 0 || isExcluded === "True";
+
+        if (dynamicPricingIsSetup) {
+            return;
+        }
+
+        displayBarNotification?.(errorMessage, 2, 1000 * 30)
     }
 
 const

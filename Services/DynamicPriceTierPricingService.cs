@@ -68,6 +68,7 @@ public class DynamicPriceTierPriceService(ICustomerService customerService, IPro
 
             await customerService.RemoveCustomerRoleMappingAsync(customer, role);
             await customerService.DeleteCustomerRoleAsync(role);
+            await dynamicPricingRepository.DeleteDynamicPriceRoleMappingAsync(role.Id);
         }
     }
 }

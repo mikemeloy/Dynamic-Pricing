@@ -13,6 +13,7 @@ public interface IDynamicPriceViewModelFactory
     public Task<AdminProductViewModel> GetAdminProductViewModel(int productId);
     public Task<ConfigureViewModel> GetAdminConfigureViewModel();
     public Task<BannerViewModel> GetBannerViewModelAsync();
+    public Task<AdminPatternListButtonViewModel> GetAdminPatternListButtonViewModelAsync();
 }
 
 public class ViewModelFactory(IPluginService pluginService, IDynamicPriceService dynamicPriceService) : IDynamicPriceViewModelFactory
@@ -39,6 +40,14 @@ public class ViewModelFactory(IPluginService pluginService, IDynamicPriceService
             PriceModifier = dynamicPriceInfo.PriceModifier,
             PriceModifierType = dynamicPriceInfo.PriceModifierTypeId,
             PriceModifierTypes = EnumHelper.GetEnumSelectList<DynamicPriceModifierType>()
+        };
+    }
+
+    public async Task<AdminPatternListButtonViewModel> GetAdminPatternListButtonViewModelAsync()
+    {
+        return new()
+        {
+            Version = await GetPluginVersionAsync()
         };
     }
 

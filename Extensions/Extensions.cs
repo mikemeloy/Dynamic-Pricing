@@ -1,4 +1,5 @@
-﻿using i7MEDIA.Plugin.Misc.Core.Extentions;
+﻿using System.Text.Json;
+using i7MEDIA.Plugin.Misc.Core.Extentions;
 using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Data;
 using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Enums;
 using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Models.Common;
@@ -21,7 +22,7 @@ public static class Extensions
                 }).ToList();
     }
 
-    public static DynamicPricing ToDynamicPriceEntity(this DynamicPricingRequestModel source)
+    public static DynamicProductPricing ToDynamicPriceEntity(this DynamicPricingRequestModel source)
     {
         return new()
         {
@@ -76,4 +77,9 @@ public static class Extensions
     public static int DeltaInSeconds(this DateTime source) => (int)(DateTime.UtcNow - source).TotalSeconds;
 
     public static async Task LogDebugAsync(this ILogger source, string message) => await source.InsertLogAsync(LogLevel.Debug, message);
+
+    public static string ToJson<T>(this T source)
+    {
+        return JsonSerializer.Serialize(source);
+    }
 }

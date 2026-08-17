@@ -3,14 +3,22 @@
 @{
     var version = Model.Version;
     var productId = Model.ProductId;
-    var saveRoute = Url.RouteUrl(PluginDefaults.SaveDynamicPrice);
+    var saveRoute = Url.RouteUrl(PluginDefaults.SaveProductDynamicPrice);
+    var selectedMetalType = Model.SelectedMetalType;
+    var excluded = Model.Exclude;
 }
 
-<!link rel="stylesheet" href="/Plugins/i7MEDIA.Plugin.Misc.Dynamic.Pricing/Areas/Admin/Styles/index.css?v=@version" />
+<!link rel="stylesheet" href="/Plugins/i7MEDIA.Plugin.Misc.Dynamic.Pricing/Areas/Admin/Styles/product.css?v=@version" />
 <!script type="module">
-    import {init} from '/Plugins/i7MEDIA.Plugin.Misc.Dynamic.Pricing/Areas/Admin/Scripts/index.js?v=@version';
+    import {init} from '/Plugins/i7MEDIA.Plugin.Misc.Dynamic.Pricing/Areas/Admin/Scripts/product.js?v=@version';
 
-    init({productId: '@productId', saveRoute: '@saveRoute'});
+    init({
+        selectedMetalType: @selectedMetalType,
+        isExcluded: '@excluded',
+        productId: '@productId',
+        saveRoute: '@saveRoute',
+        errorMessage : '@T("Admin.Dynamic.Price.Pattern.Button.Warning")'
+    });
 </!script>
 
 <nop-cards id="dynamic-price-cards">

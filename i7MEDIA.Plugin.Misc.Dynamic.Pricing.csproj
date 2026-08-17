@@ -12,10 +12,11 @@
 
   <ItemGroup>
     <None Remove="Areas\Admin\scripts\configure.js" />
-    <None Remove="Areas\Admin\scripts\index.js" />
+    <None Remove="Areas\Admin\scripts\pattern.js" />
     <None Remove="Areas\Admin\styles\configure.css" />
-    <None Remove="Areas\Admin\styles\index.css" />
+    <None Remove="Areas\Admin\styles\pattern.css" />
     <None Remove="Areas\Admin\views\configure.cshtml" />
+    <None Remove="Areas\Admin\views\_pattern.dynamic.price.cshtml" />
     <None Remove="Areas\Admin\views\_product.dynamic.price.cshtml" />
     <None Remove="Areas\Public\scripts\banner.js" />
     <None Remove="Areas\Public\scripts\index.js" />
@@ -37,13 +38,19 @@
     <Content Include="Areas\Admin\scripts\configure.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Areas\Admin\scripts\index.js">
+    <Content Include="Areas\Admin\scripts\pattern.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Admin\scripts\product.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Areas\Admin\styles\configure.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Areas\Admin\styles\index.css">
+    <Content Include="Areas\Admin\styles\pattern.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Areas\Admin\styles\product.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Areas\Admin\views\configure.cshtml">
@@ -71,6 +78,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="plugin.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Areas\Admin\views\_pattern.dynamic.price.cshtml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

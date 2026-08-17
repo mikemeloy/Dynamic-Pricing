@@ -1,4 +1,5 @@
-﻿using i7MEDIA.Plugin.Misc.Core.Extentions;
+﻿using i7MEDIA.Plugin.Misc.Core.Data;
+using i7MEDIA.Plugin.Misc.Core.Extentions;
 using i7MEDIA.Plugin.Misc.Core.Helpers;
 using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Data;
 using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Enums;
@@ -10,32 +11,33 @@ namespace i7MEDIA.Plugin.Misc.Dynamic.Pricing.Repositories;
 
 public interface IDynamicPricingRepository
 {
-    public Task InsertDynamicPricingAsync(DynamicPricing dynamicPrice);
-    public Task UpdateDynamicPricingAsync(DynamicPricing dynamicPrice);
+    public Task InsertDynamicPricingAsync(DynamicProductPricing dynamicPrice);
+    public Task UpdateDynamicPricingAsync(DynamicProductPricing dynamicPrice);
     public Task<IList<DynamicPricingMetalType>> GetMetalTypesAsync();
-    public Task<DynamicPricing?> GetDynamicPricingByProductIdAsync(int productId);
+    public Task<DynamicProductPricing?> GetDynamicPricingByProductIdAsync(int productId);
     public Task InsertMetalTypeAsync(DynamicPricingMetalType metalType);
     public Task UpdateMetalTypeAsync(DynamicPricingMetalType pricingMetalType);
     public Task DeleteMetalTypeAsync(int metalTypeId);
-    public Task<IList<DynamicPricing>> GetAllDynamicPricingItemsAsync();
+    public Task<IList<DynamicProductPricing>> GetAllDynamicPricingItemsAsync();
     public Task<List<DynamicPricedProduct>> GetProductsByMetalTypeAssociationAsync();
     public Task<Product> GetProductByIdAsync(int productId);
     public Task UpdateProductAsync(Product product);
     public Task InsertDynamicPriceRoleMappingAsync(DynamicPriceRoleMapping roleMapping);
-    public Task DeleteDynamicPriceRoleMappingAsync(DynamicPriceRoleMapping roleMapping);
+    public Task DeleteDynamicPriceRoleMappingAsync(int roleId);
     public Task<IList<DynamicPriceRoleMapping>> GetExpiredDynamicPriceRolesAsync();
     public Task<bool> GetDynamicPriceMappingByCartItemId(int cartItemId);
+    public Task<IEnumerable<Product>> GetPatternProductsbyIdAsync(int patternId);
 }
 
-public class DynamicPricingRepository(IRepository<TierPrice> tierPriceRepo, IRepository<DynamicPriceRoleMapping> roleMappingRepository, IRepository<DynamicPricingMetalType> metalTypeRepo, IRepository<DynamicPricing> dynamicPriceRepo, IRepository<Product> productRepo) : IDynamicPricingRepository
+public class DynamicPricingRepository(IRepository<PatternProductMapping> productMappingRepository, IRepository<TierPrice> tierPriceRepo, IRepository<DynamicPriceRoleMapping> roleMappingRepository, IRepository<DynamicPricingMetalType> metalTypeRepo, IRepository<DynamicProductPricing> dynamicPriceRepo, IRepository<Product> productRepo) : IDynamicPricingRepository
 {
-    public async Task InsertDynamicPricingAsync(DynamicPricing dynamicPrice)
+    public async Task InsertDynamicPricingAsync(DynamicProductPricing dynamicPrice)
     {
         dynamicPrice.UpdatedOnUtc = dynamicPrice.CreatedOnUtc = DateTime.UtcNow;
         await dynamicPriceRepo.InsertAsync(dynamicPrice);
     }
 
-    public async Task UpdateDynamicPricingAsync(DynamicPricing dynamicPrice)
+    public async Task UpdateDynamicPricingAsync(DynamicProductPricing dynamicPrice)
     {
         dynamicPrice.UpdatedOnUtc = DateTime.UtcNow;
         await dynamicPriceRepo.UpdateAsync(dynamicPrice);
@@ -50,7 +52,7 @@ public class DynamicPricingRepository(IRepository<TierPrice> tierPriceRepo, IRep
         );
     }
 
-    public async Task<IList<DynamicPricing>> GetAllDynamicPricingItemsAsync()
+    public async Task<IList<DynamicProductPricing>> GetAllDynamicPricingItemsAsync()
     {
         return await dynamicPriceRepo.GetAllAsync(async dynamicPrices =>
        {
@@ -59,7 +61,7 @@ public class DynamicPricingRepository(IRepository<TierPrice> tierPriceRepo, IRep
        });
     }
 
-    public async Task<DynamicPricing?> GetDynamicPricingByProductIdAsync(int productId)
+    public async Task<DynamicProductPricing?> GetDynamicPricingByProductIdAsync(int productId)
     {
         return (await dynamicPriceRepo.GetAllAsync(async dynamicPrices =>
         {
@@ -145,9 +147,18 @@ public class DynamicPricingRepository(IRepository<TierPrice> tierPriceRepo, IRep
         await roleMappingRepository.InsertAsync(roleMapping);
     }
 
-    public async Task DeleteDynamicPriceRoleMappingAsync(DynamicPriceRoleMapping roleMapping)
+    public async Task DeleteDynamicPriceRoleMappingAsync(int roleId)
     {
-        await roleMappingRepository.DeleteAsync(roleMapping);
+        var mapping = await (from m in roleMappingRepository.Table
+                             where m.RoleId == roleId
+                             select m).FirstOrDefaultAsync();
+
+        if (mapping.IsNull())
+        {
+            return;
+        }
+
+        await roleMappingRepository.DeleteAsync(mapping);
     }
 
     public async Task<bool> GetDynamicPriceMappingByCartItemId(int cartItemId)
@@ -159,5 +170,15 @@ public class DynamicPricingRepository(IRepository<TierPrice> tierPriceRepo, IRep
        );
 
         return result.Any();
+    }
+
+    public async Task<IEnumerable<Product>> GetPatternProductsbyIdAsync(int patternId)
+    {
+        var query = from p in productRepo.Table
+                    join map in productMappingRepository.Table on p.Id equals map.ProductId
+                    where map.PatternId == patternId
+                    select p;
+
+        return await query.ToListAsync();
     }
 }
