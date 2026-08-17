@@ -7,6 +7,7 @@ using Nop.Core.Configuration;
 using Nop.Core.Domain.ScheduleTasks;
 using Nop.Services.Configuration;
 using Nop.Services.Logging;
+using Nop.Services.Orders;
 using Nop.Services.ScheduleTasks;
 
 namespace i7MEDIA.Plugin.Misc.Dynamic.Pricing.Services;
@@ -30,9 +31,10 @@ public interface IDynamicPriceService
     public Task<ScheduleTask> GetDynamicPriceScheduledTaskAsync();
     public Task SetPatternProductsAsDyanamicallyPricedAsync(IEnumerable<int> patternIds);
     public Task SetPatternProductsAsDyanamicallyPricedAsync(int patternId);
+    public Task UpdateDynamicallyPriceCartItemsAsync();
 }
 
-public class DynamicPriceService(IDynamicPriceTierPriceService dynamicPricePriceService, IScheduleTaskService scheduleTaskService, IStoreContext storeContext, ISettingService settingService, ILogger logger, IDynamicShoppingCartRepository shoppingCartRepository, IDynamicPricingRepository dynamicPricingRepository) : IDynamicPriceService
+public class DynamicPriceService(ILogger logger, IWorkContext workContext, IStoreContext storeContext, IDynamicPriceTierPriceService dynamicPricePriceService, IScheduleTaskService scheduleTaskService, ISettingService settingService, IDynamicPricingRepository dynamicPricingRepository, IShoppingCartService shoppingCartService) : IDynamicPriceService
 {
     public async Task<DynamicProductPricing> GetProductDynamicPriceByProductIdAsync(int productId)
     {
@@ -177,7 +179,6 @@ public class DynamicPriceService(IDynamicPriceTierPriceService dynamicPricePrice
             product.Price = newPrice;
 
             await logger.LogDebugAsync($"Product {product.Name} (Id: {product.Id}) OldPrice: {oldPrice} NewPrice:{newPrice} @ {DateTime.UtcNow:G}");
-            await UpdateDynamicallyPriceCartItemsAsync(product.Id, newPrice, oldPrice, settings.CartPriceLock);
             await dynamicPricingRepository.UpdateProductAsync(product: product);
         }
     }
@@ -219,61 +220,6 @@ public class DynamicPriceService(IDynamicPriceTierPriceService dynamicPricePrice
         }
     }
 
-    public async Task<ScheduleTask> GetDynamicPriceScheduledTaskAsync()
-    {
-        try
-        {
-            return await scheduleTaskService.GetTaskByTypeAsync(PluginDefaults.ScheduledTaskType);
-
-        }
-        catch (Exception ex)
-        {
-            await logger.ErrorAsync(nameof(GetDynamicPriceScheduledTaskAsync), ex);
-        }
-
-        return new();
-    }
-
-    private async Task UpdateMetalTypeAsync(DynamicPricingMetalType pricingMetalType)
-    {
-        try
-        {
-            await logger.LogDebugAsync($"{pricingMetalType.ApiSymbol} price set at {pricingMetalType.CurrentValue} @ {DateTime.UtcNow:G} UTC");
-            await dynamicPricingRepository.UpdateMetalTypeAsync(pricingMetalType);
-        }
-        catch (Exception ex)
-        {
-            await logger.ErrorAsync(nameof(UpdateMetalTypeAsync), ex);
-        }
-    }
-
-    private async Task UpdateDynamicallyPriceCartItemsAsync(int productId, decimal newPrice, decimal oldPrice, int cartPriceLock)
-    {
-        var cartItems = await shoppingCartRepository.GetCartItemsByProductId(productId);
-
-        foreach (var cartItem in cartItems)
-        {
-            var secondsInCart = cartItem.CreatedOnUtc.DeltaInSeconds();
-            var secondsLeftInLock = cartPriceLock - secondsInCart;
-
-            if (secondsLeftInLock <= decimal.Zero)
-            {
-                continue;
-            }
-
-            var endDate = DateTime.UtcNow.AddSeconds(secondsLeftInLock);
-
-            await dynamicPricePriceService.AddTimedTierPriceAsync(
-                cartItemId: cartItem.Id,
-                customerId: cartItem.CustomerId,
-                productId: productId,
-                quantity: cartItem.Quantity,
-                endDateUtc: endDate,
-                price: oldPrice
-            );
-        }
-    }
-
     public async Task SetPatternProductsAsDyanamicallyPricedAsync(IEnumerable<int> patternIds)
     {
         if (patternIds.IsNull())
@@ -303,6 +249,55 @@ public class DynamicPriceService(IDynamicPriceTierPriceService dynamicPricePrice
             pricing.Exclude = false;
 
             await dynamicPricingRepository.UpdateDynamicPricingAsync(pricing);
+        }
+    }
+
+    public async Task UpdateDynamicallyPriceCartItemsAsync()
+    {
+        var customer = await workContext.GetCurrentCustomerAsync();
+        var cartItems = await dynamicPricingRepository.GetCustomerDynamicallyPricedCartItemsAsync(customer.Id);
+        var settings = await GetSettingsAsync<DynamicPriceSettings>();
+
+        foreach (var cartItem in cartItems)
+        {
+            var endDate = DateTime.UtcNow.AddSeconds(settings.CartPriceLock);
+
+            await dynamicPricePriceService.AddTimedTierPriceAsync(
+                cartItemId: cartItem.CartItemId,
+                customerId: cartItem.CustomerId,
+                productId: cartItem.ProductId,
+                quantity: cartItem.Quantity,
+                endDateUtc: endDate,
+                price: cartItem.Price
+            );
+        }
+    }
+
+    public async Task<ScheduleTask> GetDynamicPriceScheduledTaskAsync()
+    {
+        try
+        {
+            return await scheduleTaskService.GetTaskByTypeAsync(PluginDefaults.ScheduledTaskType);
+
+        }
+        catch (Exception ex)
+        {
+            await logger.ErrorAsync(nameof(GetDynamicPriceScheduledTaskAsync), ex);
+        }
+
+        return new();
+    }
+
+    private async Task UpdateMetalTypeAsync(DynamicPricingMetalType pricingMetalType)
+    {
+        try
+        {
+            await logger.LogDebugAsync($"{pricingMetalType.ApiSymbol} price set at {pricingMetalType.CurrentValue} @ {DateTime.UtcNow:G} UTC");
+            await dynamicPricingRepository.UpdateMetalTypeAsync(pricingMetalType);
+        }
+        catch (Exception ex)
+        {
+            await logger.ErrorAsync(nameof(UpdateMetalTypeAsync), ex);
         }
     }
 }

@@ -5,6 +5,7 @@ using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Data;
 using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Enums;
 using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Models.Common;
 using Nop.Core.Domain.Catalog;
+using Nop.Core.Domain.Orders;
 using Nop.Data;
 
 namespace i7MEDIA.Plugin.Misc.Dynamic.Pricing.Repositories;
@@ -27,9 +28,10 @@ public interface IDynamicPricingRepository
     public Task<IList<DynamicPriceRoleMapping>> GetExpiredDynamicPriceRolesAsync();
     public Task<bool> GetDynamicPriceMappingByCartItemId(int cartItemId);
     public Task<IEnumerable<Product>> GetPatternProductsbyIdAsync(int patternId);
+    public Task<IEnumerable<CartItemDetails>> GetCustomerDynamicallyPricedCartItemsAsync(int customerId);
 }
 
-public class DynamicPricingRepository(IRepository<PatternProductMapping> productMappingRepository, IRepository<TierPrice> tierPriceRepo, IRepository<DynamicPriceRoleMapping> roleMappingRepository, IRepository<DynamicPricingMetalType> metalTypeRepo, IRepository<DynamicProductPricing> dynamicPriceRepo, IRepository<Product> productRepo) : IDynamicPricingRepository
+public class DynamicPricingRepository(IRepository<PatternProductMapping> productMappingRepository, IRepository<ShoppingCartItem> cartItemRepo, IRepository<TierPrice> tierPriceRepo, IRepository<DynamicPriceRoleMapping> roleMappingRepository, IRepository<DynamicPricingMetalType> metalTypeRepo, IRepository<DynamicProductPricing> dynamicPriceRepo, IRepository<Product> productRepo) : IDynamicPricingRepository
 {
     public async Task InsertDynamicPricingAsync(DynamicProductPricing dynamicPrice)
     {
@@ -118,6 +120,24 @@ public class DynamicPricingRepository(IRepository<PatternProductMapping> product
                     PriceModifier = d.PriceModifier,
                     PriceModifierTypeId = EnumHelper.ToEnum<DynamicPriceModifierType>(d.PriceModifierTypeId)
                 }).ToList();
+    }
+
+    public async Task<IEnumerable<CartItemDetails>> GetCustomerDynamicallyPricedCartItemsAsync(int customerId)
+    {
+        var query = from p in productRepo.Table
+                    join dp in dynamicPriceRepo.Table on p.Id equals dp.ProductId
+                    join cart in cartItemRepo.Table on p.Id equals cart.ProductId
+                    where cart.CustomerId == customerId
+                    select new CartItemDetails
+                    {
+                        ProductId = dp.ProductId,
+                        CartItemId = cart.Id,
+                        CustomerId = cart.CustomerId,
+                        Price = p.Price,
+                        Quantity = cart.Quantity
+                    };
+
+        return await query.ToListAsync();
     }
 
     public Task<Product> GetProductByIdAsync(int productId)

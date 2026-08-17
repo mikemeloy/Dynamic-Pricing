@@ -1,4 +1,5 @@
 ﻿using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Factories;
+using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Infrastructure.Middleware;
 using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Repositories;
 using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Services;
 using Microsoft.AspNetCore.Builder;
@@ -14,7 +15,7 @@ public class NopStartup : INopStartup
 
     public void Configure(IApplicationBuilder application)
     {
-
+        application.UseCheckoutPageMiddleware();
     }
 
     public void ConfigureServices(IServiceCollection services, IConfiguration configuration)
