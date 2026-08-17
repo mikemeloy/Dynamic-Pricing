@@ -88,7 +88,11 @@ public class Plugin(ILocalizationService localizationService, IDynamicPriceServi
             ["admin.dynamic.price.banner.label.timer"] = "Time Left:",
             ["Admin.Dynamic.Price.Label.Price.Modifier.Type"] = "Modifier Type",
             ["admin.dynamic.price.label.price.modifier"] = "Modifier Value",
-            ["admin.dynamic.price.banner.span.platinum"] = "Platinum"
+            ["admin.dynamic.price.banner.span.platinum"] = "Platinum",
+            ["Admin.Dynamic.Price.Pattern.Button.Save"] = "Add dynamic pricing",
+            ["Admin.Dynamic.Price.Pattern.Button.Warning"] = "This product is not setup for dynamic pricing, please select a metal type and add the weight of the product in oz (T) or check \"Exclude from pricing\" to remove this message",
+            ["Admin.Dynamic.Price.Product.Warn"] = "This product is not setup for dynamic pricing!!",
+            ["i7media.plugin.misc.patterns.products.fields.isdynamicallypriced"] = "Is dynamically priced?"
         });
     }
 

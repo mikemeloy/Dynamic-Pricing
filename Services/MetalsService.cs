@@ -1,9 +1,6 @@
 ﻿using System.Text.Json;
 using i7MEDIA.Plugin.Misc.Core.Extentions;
 using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Models.External;
-using Nop.Core;
-using Nop.Core.Configuration;
-using Nop.Services.Configuration;
 using Nop.Services.Logging;
 
 namespace i7MEDIA.Plugin.Misc.Dynamic.Pricing.Services;
@@ -13,7 +10,7 @@ public interface IMetalsService
     public Task<Dictionary<string, decimal>?> GetCurrentMetalPricesAsync();
 }
 
-public class MetalsService(IStoreContext storeContext, ISettingService settingService, ILogger logger, IDynamicPriceService dynamicPriceService) : IMetalsService
+public class MetalsService(ILogger logger, IDynamicPriceService dynamicPriceService) : IMetalsService
 {
     /// <summary>
     /// Returns a dictionary mapping Api  material Symbol to DynamicPricingMetalType.ApiSymbol
@@ -31,7 +28,7 @@ public class MetalsService(IStoreContext storeContext, ISettingService settingSe
         try
         {
 #if !DEBUG
-            var settings = await GetSettingsAsync<DynamicPriceSettings>();
+            var settings = await dynamicPriceService.GetSettingsAsync<DynamicPriceSettings>();
             var client = new HttpClient();
             var url = $"{settings.ApiEndpoint}?api_key={settings.ApiKey}&base=USD&currencies={string.Join(',', metalTypes)}";
             var request = new HttpRequestMessage(HttpMethod.Get, url);
@@ -64,13 +61,5 @@ public class MetalsService(IStoreContext storeContext, ISettingService settingSe
             await logger.ErrorAsync(nameof(GetCurrentMetalPricesAsync), ex);
             return null;
         }
-    }
-
-    public async Task<T> GetSettingsAsync<T>() where T : ISettings, new()
-    {
-        var storeScope = await storeContext.GetActiveStoreScopeConfigurationAsync();
-        var setting = await settingService.LoadSettingAsync<T>(storeScope);
-
-        return setting;
     }
 }

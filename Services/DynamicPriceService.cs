@@ -28,7 +28,8 @@ public interface IDynamicPriceService
     public Task InsertInitialSettings();
     public Task SaveSettingsAsync(decimal conversion, string apiKey, string endpoint, int cartPriceLockInSeconds);
     public Task<ScheduleTask> GetDynamicPriceScheduledTaskAsync();
-    public Task<DynamicPatternPricing> GetPatternDynamicPriceByPatternIdAsync(int patternId);
+    public Task SetPatternProductsAsDyanamicallyPricedAsync(IEnumerable<int> patternIds);
+    public Task SetPatternProductsAsDyanamicallyPricedAsync(int patternId);
 }
 
 public class DynamicPriceService(IDynamicPriceTierPriceService dynamicPricePriceService, IScheduleTaskService scheduleTaskService, IStoreContext storeContext, ISettingService settingService, ILogger logger, IDynamicShoppingCartRepository shoppingCartRepository, IDynamicPricingRepository dynamicPricingRepository) : IDynamicPriceService
@@ -273,10 +274,35 @@ public class DynamicPriceService(IDynamicPriceTierPriceService dynamicPricePrice
         }
     }
 
-    public async Task<DynamicPatternPricing> GetPatternDynamicPriceByPatternIdAsync(int patternId)
+    public async Task SetPatternProductsAsDyanamicallyPricedAsync(IEnumerable<int> patternIds)
     {
+        if (patternIds.IsNull())
+        {
+            return;
+        }
 
+        foreach (var patternId in patternIds)
+        {
+            await SetPatternProductsAsDyanamicallyPricedAsync(patternId);
+        }
+    }
 
-        return new();
+    public async Task SetPatternProductsAsDyanamicallyPricedAsync(int patternId)
+    {
+        var products = await dynamicPricingRepository.GetPatternProductsbyIdAsync(patternId);
+
+        foreach (var product in products)
+        {
+            var pricing = await GetProductDynamicPriceByProductIdAsync(product.Id);
+
+            if (pricing.IsNull())
+            {
+                continue;
+            }
+
+            pricing.Exclude = false;
+
+            await dynamicPricingRepository.UpdateDynamicPricingAsync(pricing);
+        }
     }
 }

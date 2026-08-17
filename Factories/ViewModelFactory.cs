@@ -13,6 +13,7 @@ public interface IDynamicPriceViewModelFactory
     public Task<AdminProductViewModel> GetAdminProductViewModel(int productId);
     public Task<ConfigureViewModel> GetAdminConfigureViewModel();
     public Task<BannerViewModel> GetBannerViewModelAsync();
+    public Task<AdminPatternListButtonViewModel> GetAdminPatternListButtonViewModelAsync();
 }
 
 public class ViewModelFactory(IPluginService pluginService, IDynamicPriceService dynamicPriceService) : IDynamicPriceViewModelFactory
@@ -42,23 +43,11 @@ public class ViewModelFactory(IPluginService pluginService, IDynamicPriceService
         };
     }
 
-    public async Task<AdminPatternViewModel> GetAdminPatternViewModel(int patternId)
+    public async Task<AdminPatternListButtonViewModel> GetAdminPatternListButtonViewModelAsync()
     {
-        var metalTypes = await dynamicPriceService.GetMetalTypesAsync();
-        var dynamicPriceInfo = await dynamicPriceService.GetPatternDynamicPriceByPatternIdAsync(patternId);
-
         return new()
         {
-            Version = await GetPluginVersionAsync(),
-            PatternId = patternId,
-            SelectedMetalType = dynamicPriceInfo.MetalTypeId,
-            AvailableMetalTypes = metalTypes.ToSelectItemList(
-                label: e => e.Name,
-                value: e => e.Id.ToString()
-            ),
-            PriceModifier = dynamicPriceInfo.PriceModifier,
-            PriceModifierType = dynamicPriceInfo.PriceModifierTypeId,
-            PriceModifierTypes = EnumHelper.GetEnumSelectList<DynamicPriceModifierType>()
+            Version = await GetPluginVersionAsync()
         };
     }
 
