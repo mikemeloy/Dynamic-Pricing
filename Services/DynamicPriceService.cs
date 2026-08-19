@@ -7,7 +7,6 @@ using Nop.Core.Configuration;
 using Nop.Core.Domain.ScheduleTasks;
 using Nop.Services.Configuration;
 using Nop.Services.Logging;
-using Nop.Services.Orders;
 using Nop.Services.ScheduleTasks;
 
 namespace i7MEDIA.Plugin.Misc.Dynamic.Pricing.Services;
@@ -32,9 +31,10 @@ public interface IDynamicPriceService
     public Task SetPatternProductsAsDyanamicallyPricedAsync(IEnumerable<int> patternIds);
     public Task SetPatternProductsAsDyanamicallyPricedAsync(int patternId);
     public Task UpdateDynamicallyPriceCartItemsAsync();
+    public Task<int> GetCurrentCartLock();
 }
 
-public class DynamicPriceService(ILogger logger, IWorkContext workContext, IStoreContext storeContext, IDynamicPriceTierPriceService dynamicPricePriceService, IScheduleTaskService scheduleTaskService, ISettingService settingService, IDynamicPricingRepository dynamicPricingRepository, IShoppingCartService shoppingCartService) : IDynamicPriceService
+public class DynamicPriceService(ILogger logger, IWorkContext workContext, IStoreContext storeContext, IDynamicPriceTierPriceService dynamicPricePriceService, IScheduleTaskService scheduleTaskService, ISettingService settingService, IDynamicPricingRepository dynamicPricingRepository, IDynamicShoppingCartRepository dynamicShoppingCartRepo) : IDynamicPriceService
 {
     public async Task<DynamicProductPricing> GetProductDynamicPriceByProductIdAsync(int productId)
     {
@@ -299,5 +299,21 @@ public class DynamicPriceService(ILogger logger, IWorkContext workContext, IStor
         {
             await logger.ErrorAsync(nameof(UpdateMetalTypeAsync), ex);
         }
+    }
+
+    public async Task<int> GetCurrentCartLock()
+    {
+        try
+        {
+            var customer = await workContext.GetCurrentCustomerAsync();
+            return await dynamicShoppingCartRepo.GetCartPriceLockByCustomerAsync(customer);
+
+        }
+        catch (Exception ex)
+        {
+            await logger.ErrorAsync(nameof(GetCurrentCartLock), ex);
+        }
+
+        return 0;
     }
 }

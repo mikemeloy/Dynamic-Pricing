@@ -75,6 +75,7 @@ public class ViewModelFactory(IPluginService pluginService, IDynamicPriceService
         var gold = values.FirstOrDefault(g => g.ApiSymbol == settings.GoldSymbol);
         var silver = values.FirstOrDefault(s => s.ApiSymbol == settings.SilverSymbol);
         var platinum = values.FirstOrDefault(p => p.ApiSymbol == settings.PlatinumSymbol);
+        var cartLock = await dynamicPriceService.GetCurrentCartLock();
 
         return new()
         {
@@ -88,9 +89,9 @@ public class ViewModelFactory(IPluginService pluginService, IDynamicPriceService
             PlatinumPrice = platinum.GetValueOrDefault(p => p.CurrentValue, 0.0m),
             PlatinumDelta = platinum.GetValueOrDefault(p => p.CurrentValue, 0.0m) - platinum.GetValueOrDefault(p => p.PreviousValue, 0.0m),
             PlatinumSymbol = platinum.GetValueOrDefault(p => p.ApiSymbol, ""),
-            CartPriceLock = settings.CartPriceLock,
             SecondsSinceLastPriceUpdate = scheduledTask.LastSuccessUtc.DeltaInSeconds(),
-            PriceUpdateInterval = scheduledTask.Seconds
+            PriceUpdateInterval = scheduledTask.Seconds,
+            CartPriceLock = cartLock
         };
     }
 

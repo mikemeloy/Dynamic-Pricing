@@ -15,10 +15,10 @@
     var platSymbol = Model.PlatinumSymbol;
     var platDelta = Model.PlatinumDelta;
 
-    var secondsSinceLastUpdate = Model.SecondsSinceLastPriceUpdate;
     var cartPriceLock = Model.CartPriceLock;
+    var PriceUpdateInterval = Model.PriceUpdateInterval;
+    var SecondsSinceLastPriceUpdate = Model.SecondsSinceLastPriceUpdate;
     var getValuesRoute = Url.RouteUrl(PluginDefaults.GetDynamicPriceValues);
-    var priceUpdateInterval = Model.PriceUpdateInterval;
 }
 
 <!link rel="stylesheet" href="/Plugins/i7MEDIA.Plugin.Misc.Dynamic.Pricing/Areas/Public/styles/banner.css?v=@version" />
@@ -27,10 +27,10 @@
     import {init} from '/Plugins/i7MEDIA.Plugin.Misc.Dynamic.Pricing/Areas/Public/scripts/banner.js?v=@version';
 
     init({
-        secondsSinceLastUpdate: @secondsSinceLastUpdate,
         cartPriceLock: @cartPriceLock,
         getRoute: '@getValuesRoute',
-        priceUpdateInterval: @priceUpdateInterval
+        secondsSinceLastUpdate : @SecondsSinceLastPriceUpdate,
+        priceUpdateInterval: @PriceUpdateInterval
     });
 </!script>
 

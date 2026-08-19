@@ -5,26 +5,28 @@ let
   _getUrl;
 
 const
-  init = ({ secondsSinceLastUpdate, getRoute, priceUpdateInterval }) => {
+  init = ({ getRoute, cartPriceLock, secondsSinceLastUpdate, priceUpdateInterval }) => {
 
     _getUrl = getRoute;
-    initTimer({ priceUpdateInterval, secondsSinceLastUpdate });
-  },
-  initTimer = ({ priceUpdateInterval, secondsSinceLastUpdate }) => {
     _banner = document.querySelector("[data-dynamic-price-banner]");
-
-    const
-      el = _banner.querySelector('[data-timer]');
+    initPriceUpdateTimer({ secondsSinceLastUpdate, priceUpdateInterval });
+    initCartLockTimer({ cartPriceLock });
+  },
+  initCartLockTimer = ({ cartPriceLock }) => {
+    if (!cartPriceLock) {
+      console.info('no price lock');
+      return;
+    }
 
     let
-      timer = priceUpdateInterval - secondsSinceLastUpdate,
       minutes,
       seconds;
 
     const
+      el = _banner.querySelector('[data-timer]'),
       interval = setInterval(async function () {
-        minutes = parseInt(timer / 60, 10);
-        seconds = parseInt(timer % 60, 10);
+        minutes = parseInt(cartPriceLock / 60, 10);
+        seconds = parseInt(cartPriceLock % 60, 10);
 
         seconds = (seconds < 10)
           ? `0${seconds}`
@@ -32,9 +34,30 @@ const
 
         el.textContent = `${minutes}:${seconds}`;
 
+        if (--cartPriceLock > 0) {
+          return;
+        }
+
+        try {
+          location.reload();
+        } catch (error) {
+          console.error(error);
+          clearInterval(interval);
+          _banner.remove();
+        }
+      }, 1000);
+  },
+  initPriceUpdateTimer = ({ priceUpdateInterval, secondsSinceLastUpdate }) => {
+    let
+      timer = (priceUpdateInterval - secondsSinceLastUpdate);
+
+    const
+      interval = setInterval(async function () {
+
         if (--timer < 0) {
           timer = priceUpdateInterval;
           try {
+            console.info("Updated metal prices");
             await getNewMetalPrices();
           } catch (error) {
             console.error(error);

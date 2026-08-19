@@ -15,7 +15,7 @@ public interface IDynamicPriceTierPriceService
     public Task DynamicPriceRoleCleanupAsync();
 }
 
-public class DynamicPriceTierPriceService(ICustomerService customerService, IProductService productService, IDynamicPricingRepository dynamicPricingRepository) : IDynamicPriceTierPriceService
+public class DynamicPriceTierPriceService(ICustomerService customerService, IProductService productService, IDynamicPricingRepository dynamicPricingRepository, IDynamicShoppingCartRepository shoppingCartRepo) : IDynamicPriceTierPriceService
 {
     public async Task AddTimedTierPriceAsync(int cartItemId, int customerId, decimal price, int productId, int quantity, DateTime endDateUtc, int storeId = 0)
     {

@@ -3,7 +3,6 @@
 public class BannerViewModel
 {
     public required int CartPriceLock { get; set; }
-    public int SecondsSinceLastPriceUpdate { get; set; }
     public required string Version { get; set; }
     public decimal GoldPrice { get; set; }
     public decimal SilverPrice { get; set; }
@@ -14,5 +13,6 @@ public class BannerViewModel
     public required string GoldSymbol { get; set; }
     public required string SilverSymbol { get; set; }
     public required string PlatinumSymbol { get; set; }
+    public int SecondsSinceLastPriceUpdate { get; set; }
     public int PriceUpdateInterval { get; set; }
 }

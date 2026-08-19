@@ -40,7 +40,6 @@
   }
 
   [data-dynamic-price-timer] {
-    opacity: 0;
     margin-left: auto;
     padding-inline: 2rem;
     [data-timer] {
