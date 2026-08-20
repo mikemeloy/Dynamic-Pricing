@@ -92,6 +92,7 @@ public class Plugin(ILocalizationService localizationService, IDynamicPriceServi
             ["Admin.Dynamic.Price.Pattern.Button.Save"] = "Add dynamic pricing",
             ["Admin.Dynamic.Price.Pattern.Button.Warning"] = "This product is not setup for dynamic pricing, please select a metal type and add the weight of the product in oz (T) or check \"Exclude from pricing\" to remove this message",
             ["Admin.Dynamic.Price.Product.Warn"] = "This product is not setup for dynamic pricing!!",
+            ["public.dynamic.price.banner.confirm"] = "Your bag prices may have changed and the total displayed below may no longer be valid, Press Ok to refresh the page",
             ["i7media.plugin.misc.patterns.products.fields.isdynamicallypriced"] = "Is dynamically priced?"
         });
     }

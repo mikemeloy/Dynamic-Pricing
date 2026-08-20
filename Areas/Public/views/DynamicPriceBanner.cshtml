@@ -30,7 +30,9 @@
         cartPriceLock: @cartPriceLock,
         getRoute: '@getValuesRoute',
         secondsSinceLastUpdate : @SecondsSinceLastPriceUpdate,
-        priceUpdateInterval: @PriceUpdateInterval
+        priceUpdateInterval: @PriceUpdateInterval,
+        confirmMessage: '@T("public.dynamic.price.banner.confirm")',
+        notificationUris: ['/checkout', '/simplecheckout']
     });
 </!script>
 
@@ -55,7 +57,7 @@
         <span data-delta>@platDelta.ToCurrency()</span>
     </section>
 
-    <section data-dynamic-price-timer>
+    <section data-dynamic-price-timer hidden>
         <span>@T("admin.dynamic.price.banner.label.timer")</span><span data-timer>--:--</span>
     </section>
 </div>

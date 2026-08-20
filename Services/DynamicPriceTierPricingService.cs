@@ -1,4 +1,5 @@
 ﻿using i7MEDIA.Plugin.Misc.Core.Extentions;
+using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Extensions;
 using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Repositories;
 using Nop.Core.Domain.Customers;
 using Nop.Services.Catalog;
@@ -19,10 +20,14 @@ public class DynamicPriceTierPriceService(ICustomerService customerService, IPro
 {
     public async Task AddTimedTierPriceAsync(int cartItemId, int customerId, decimal price, int productId, int quantity, DateTime endDateUtc, int storeId = 0)
     {
-        var hasExistingMap = await dynamicPricingRepository.GetDynamicPriceMappingByCartItemId(cartItemId);
+        var existingTierPrice = await dynamicPricingRepository.GetTierPricingByCartIdAsync(cartItemId);
 
-        if (hasExistingMap)
+        if (existingTierPrice.IsNotNull() && existingTierPrice.IsExpired())
         {
+            existingTierPrice.Price = price;
+            existingTierPrice.EndDateTimeUtc = endDateUtc;
+
+            await productService.UpdateTierPriceAsync(existingTierPrice);
             return;
         }
 

@@ -2,21 +2,29 @@
 
 let
   _banner,
-  _getUrl;
+  _getUrl,
+  _confirmMessage,
+  _notificationUris = [];
 
 const
-  init = ({ getRoute, cartPriceLock, secondsSinceLastUpdate, priceUpdateInterval }) => {
-
+  init = ({ getRoute, cartPriceLock, secondsSinceLastUpdate, priceUpdateInterval, confirmMessage, notificationUris }) => {
     _getUrl = getRoute;
+    _confirmMessage = confirmMessage;
     _banner = document.querySelector("[data-dynamic-price-banner]");
+    _notificationUris = Array.isArray(notificationUris)
+      ? notificationUris
+      : [];
+
     initPriceUpdateTimer({ secondsSinceLastUpdate, priceUpdateInterval });
     initCartLockTimer({ cartPriceLock });
   },
   initCartLockTimer = ({ cartPriceLock }) => {
-    if (!cartPriceLock) {
+    if (cartPriceLock <= 0) {
       console.info('no price lock');
       return;
     }
+
+    toggleTimer();
 
     let
       minutes,
@@ -25,6 +33,7 @@ const
     const
       el = _banner.querySelector('[data-timer]'),
       interval = setInterval(async function () {
+
         minutes = parseInt(cartPriceLock / 60, 10);
         seconds = parseInt(cartPriceLock % 60, 10);
 
@@ -34,16 +43,24 @@ const
 
         el.textContent = `${minutes}:${seconds}`;
 
-        if (--cartPriceLock > 0) {
+        if (cartPriceLock-- > -1) {
           return;
         }
 
         try {
-          location.reload();
+          toggleTimer();
+          clearInterval(interval);
+          const
+            reloadPage = reloadPageOnTimerExpiry();
+
+          if (reloadPage) {
+            location.reload();
+          }
+
         } catch (error) {
-          console.error(error);
           clearInterval(interval);
           _banner.remove();
+          console.error(error);
         }
       }, 1000);
   },
@@ -57,7 +74,6 @@ const
         if (--timer < 0) {
           timer = priceUpdateInterval;
           try {
-            console.info("Updated metal prices");
             await getNewMetalPrices();
           } catch (error) {
             console.error(error);
@@ -71,6 +87,8 @@ const
     const
       response = await fetch(_getUrl),
       metalTypes = await response.json();
+
+    console.table(metalTypes);
 
     for (const { ApiSymbol, CurrentValue, PreviousValue } of metalTypes) {
       const
@@ -90,6 +108,22 @@ const
       current.innerText = toCurrency(CurrentValue);
       delta.innerText = toCurrency(CurrentValue - PreviousValue);
     }
-  }
+  },
+  toggleTimer = () => {
+    const timerEl = _banner.querySelector("[data-dynamic-price-timer]");
+
+    timerEl.hidden = !timerEl.hidden;
+  },
+  reloadPageOnTimerExpiry = () => {
+    const
+      isCheckoutPage = _notificationUris.includes(location.pathname);
+
+    if (!isCheckoutPage) {
+      return false;
+    }
+
+    return confirm(_confirmMessage);
+  };
+
 
 export { init }

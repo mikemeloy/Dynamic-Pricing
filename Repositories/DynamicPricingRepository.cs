@@ -5,6 +5,7 @@ using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Data;
 using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Enums;
 using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Models.Common;
 using Nop.Core.Domain.Catalog;
+using Nop.Core.Domain.Customers;
 using Nop.Core.Domain.Orders;
 using Nop.Data;
 
@@ -26,12 +27,12 @@ public interface IDynamicPricingRepository
     public Task InsertDynamicPriceRoleMappingAsync(DynamicPriceRoleMapping roleMapping);
     public Task DeleteDynamicPriceRoleMappingAsync(int roleId);
     public Task<IList<DynamicPriceRoleMapping>> GetExpiredDynamicPriceRolesAsync();
-    public Task<bool> GetDynamicPriceMappingByCartItemId(int cartItemId);
+    public Task<TierPrice> GetTierPricingByCartIdAsync(int cartItemId);
     public Task<IEnumerable<Product>> GetPatternProductsbyIdAsync(int patternId);
     public Task<IEnumerable<CartItemDetails>> GetCustomerDynamicallyPricedCartItemsAsync(int customerId);
 }
 
-public class DynamicPricingRepository(IRepository<PatternProductMapping> productMappingRepository, IRepository<ShoppingCartItem> cartItemRepo, IRepository<TierPrice> tierPriceRepo, IRepository<DynamicPriceRoleMapping> roleMappingRepository, IRepository<DynamicPricingMetalType> metalTypeRepo, IRepository<DynamicProductPricing> dynamicPriceRepo, IRepository<Product> productRepo) : IDynamicPricingRepository
+public class DynamicPricingRepository(IRepository<PatternProductMapping> productMappingRepository, IRepository<ShoppingCartItem> cartItemRepo, IRepository<TierPrice> tierPriceRepo, IRepository<DynamicPriceRoleMapping> roleMappingRepository, IRepository<DynamicPricingMetalType> metalTypeRepo, IRepository<DynamicProductPricing> dynamicPriceRepo, IRepository<Product> productRepo, IRepository<CustomerRole> customerRoleRepo) : IDynamicPricingRepository
 {
     public async Task InsertDynamicPricingAsync(DynamicProductPricing dynamicPrice)
     {
@@ -181,15 +182,15 @@ public class DynamicPricingRepository(IRepository<PatternProductMapping> product
         await roleMappingRepository.DeleteAsync(mapping);
     }
 
-    public async Task<bool> GetDynamicPriceMappingByCartItemId(int cartItemId)
+    public async Task<TierPrice> GetTierPricingByCartIdAsync(int cartItemId)
     {
-        var result = await roleMappingRepository.GetAllAsync(async mapping =>
-           from map in mapping
-           where map.CartItemId == cartItemId
-           select map
-       );
+        var query = from dpr in roleMappingRepository.Table
+                    join cr in customerRoleRepo.Table on dpr.RoleId equals cr.Id
+                    join tp in tierPriceRepo.Table on cr.Id equals tp.CustomerRoleId
+                    where dpr.CartItemId == cartItemId
+                    select tp;
 
-        return result.Any();
+        return await query.FirstOrDefaultAsync();
     }
 
     public async Task<IEnumerable<Product>> GetPatternProductsbyIdAsync(int patternId)

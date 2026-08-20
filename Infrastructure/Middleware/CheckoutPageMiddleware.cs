@@ -1,4 +1,5 @@
-﻿using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Services;
+﻿using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Extensions;
+using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Nop.Services.Logging;
@@ -11,7 +12,7 @@ public class CheckoutPageMiddleware(ILogger logger, RequestDelegate next, IDynam
     {
         try
         {
-            if (context.Request.Path.StartsWithSegments(new PathString("/checkout")) || context.Request.Path.StartsWithSegments(new PathString("/simplecheckout")))
+            if (context.IsCheckoutPage())
             {
                 await dynamicPriceService.UpdateDynamicallyPriceCartItemsAsync();
             }
