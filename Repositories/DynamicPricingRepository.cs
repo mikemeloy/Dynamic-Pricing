@@ -30,6 +30,7 @@ public interface IDynamicPricingRepository
     public Task<TierPrice> GetTierPricingByCartIdAsync(int cartItemId);
     public Task<IEnumerable<Product>> GetPatternProductsbyIdAsync(int patternId);
     public Task<IEnumerable<CartItemDetails>> GetCustomerDynamicallyPricedCartItemsAsync(int customerId);
+    public Task DeleteTierPricingByRoleIdAsync(int id);
 }
 
 public class DynamicPricingRepository(IRepository<PatternProductMapping> productMappingRepository, IRepository<ShoppingCartItem> cartItemRepo, IRepository<TierPrice> tierPriceRepo, IRepository<DynamicPriceRoleMapping> roleMappingRepository, IRepository<DynamicPricingMetalType> metalTypeRepo, IRepository<DynamicProductPricing> dynamicPriceRepo, IRepository<Product> productRepo, IRepository<CustomerRole> customerRoleRepo) : IDynamicPricingRepository
@@ -51,6 +52,7 @@ public class DynamicPricingRepository(IRepository<PatternProductMapping> product
         return await metalTypeRepo.GetAllAsync(async metalTypes =>
              from mt in metalTypes
              where !mt.Deleted
+             orderby mt.Order
              select mt
         );
     }
@@ -201,5 +203,14 @@ public class DynamicPricingRepository(IRepository<PatternProductMapping> product
                     select p;
 
         return await query.ToListAsync();
+    }
+
+    public async Task DeleteTierPricingByRoleIdAsync(int id)
+    {
+        var query = (from tp in tierPriceRepo.Table
+                     where tp.CustomerRoleId == id
+                     select tp).ToList();
+
+        await tierPriceRepo.DeleteAsync(query);
     }
 }

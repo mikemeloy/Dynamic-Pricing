@@ -36,11 +36,13 @@ public class MetalsService(ILogger logger, IDynamicPriceService dynamicPriceServ
             var content = await response.Content.ReadAsStringAsync();
 #else
             var rand = new Random();
-            var goldValue = rand.Next(7000, 8000);
+            var goldValue = rand.Next(4000, 5000);
             var silverValue = rand.Next(500, 700);
             var platinumValue = rand.Next(1000, 1200);
+            var palladiumValue = rand.Next(2500, 2900);
+            var copperValue = rand.Next(500, 600);
 
-            var content = $"{{\"success\":true,\"base\":\"USD\",\"timestamp\":1784764799,\"rates\":{{\"USDXPT\":{platinumValue},\"USDXAG\":{goldValue},\"USDXAU\":{silverValue},\"XAG\":0.0169528822,\"XAU\":0.0002444298}}}}";
+            var content = $"{{\"success\":true,\"base\":\"USD\",\"timestamp\":1784764799,\"rates\":{{\"USDXPD\":{palladiumValue},\"USDXCU\":{copperValue},\"USDXPT\":{platinumValue},\"USDXAG\":{goldValue},\"USDXAU\":{silverValue},\"XAG\":0.0169528822,\"XAU\":0.0002444298}}}}";
 #endif
             var apiResponse = JsonSerializer.Deserialize<PreciousMetalsApiResponse>(content);
 

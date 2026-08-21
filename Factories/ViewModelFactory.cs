@@ -71,27 +71,22 @@ public class ViewModelFactory(IPluginService pluginService, IDynamicPriceService
         var values = await dynamicPriceService.GetMetalTypesAsync();
         var settings = await dynamicPriceService.GetSettingsAsync<DynamicPriceSettings>();
         var scheduledTask = await dynamicPriceService.GetDynamicPriceScheduledTaskAsync();
-
-        var gold = values.FirstOrDefault(g => g.ApiSymbol == settings.GoldSymbol);
-        var silver = values.FirstOrDefault(s => s.ApiSymbol == settings.SilverSymbol);
-        var platinum = values.FirstOrDefault(p => p.ApiSymbol == settings.PlatinumSymbol);
         var cartLock = await dynamicPriceService.GetCurrentCartLock();
 
         return new()
         {
             Version = await GetPluginVersionAsync(),
-            GoldPrice = gold.GetValueOrDefault(g => g.CurrentValue, 0.0m),
-            GoldDelta = gold.GetValueOrDefault(g => g.CurrentValue, 0.0m) - gold.GetValueOrDefault(g => g.PreviousValue, 0.0m),
-            GoldSymbol = gold.GetValueOrDefault(g => g.ApiSymbol, ""),
-            SilverPrice = silver.GetValueOrDefault(s => s.CurrentValue, 0.0m),
-            SilverDelta = silver.GetValueOrDefault(s => s.CurrentValue, 0.0m) - silver.GetValueOrDefault(s => s.PreviousValue, 0.0m),
-            SilverSymbol = silver.GetValueOrDefault(s => s.ApiSymbol, ""),
-            PlatinumPrice = platinum.GetValueOrDefault(p => p.CurrentValue, 0.0m),
-            PlatinumDelta = platinum.GetValueOrDefault(p => p.CurrentValue, 0.0m) - platinum.GetValueOrDefault(p => p.PreviousValue, 0.0m),
-            PlatinumSymbol = platinum.GetValueOrDefault(p => p.ApiSymbol, ""),
             SecondsSinceLastPriceUpdate = scheduledTask.LastSuccessUtc.DeltaInSeconds(),
             PriceUpdateInterval = scheduledTask.Seconds,
-            CartPriceLock = cartLock
+            CartPriceLock = cartLock,
+            Tokens = from t in values
+                     where !string.IsNullOrWhiteSpace(t.ApiSymbol)
+                     select new BannerTokens()
+                     {
+                         Symbol = t.ApiSymbol,
+                         Delta = t.CurrentValue - t.PreviousValue,
+                         Price = t.CurrentValue
+                     }
         };
     }
 

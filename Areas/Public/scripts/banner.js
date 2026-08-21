@@ -3,26 +3,32 @@
 let
   _banner,
   _getUrl,
+  _cartLockCreateUrl,
   _confirmMessage,
-  _notificationUris = [];
+  _cartLockUris;
 
 const
-  init = ({ getRoute, cartPriceLock, secondsSinceLastUpdate, priceUpdateInterval, confirmMessage, notificationUris }) => {
+  init = async ({ getRoute, cartLockCreateRoute, cartPriceLock, secondsSinceLastUpdate, priceUpdateInterval, confirmMessage, notificationUris }) => {
     _getUrl = getRoute;
+    _cartLockCreateUrl = cartLockCreateRoute;
     _confirmMessage = confirmMessage;
     _banner = document.querySelector("[data-dynamic-price-banner]");
-    _notificationUris = Array.isArray(notificationUris)
+    _cartLockUris = Array.isArray(notificationUris)
       ? notificationUris
       : [];
 
     initPriceUpdateTimer({ secondsSinceLastUpdate, priceUpdateInterval });
-    initCartLockTimer({ cartPriceLock });
+    await initCartLockTimer({ cartPriceLock });
   },
-  initCartLockTimer = ({ cartPriceLock }) => {
-    if (cartPriceLock <= 0) {
-      console.info('no price lock');
+  initCartLockTimer = async ({ cartPriceLock }) => {
+    const
+      isCheckoutPage = _cartLockUris.includes(location.pathname);
+
+    if (!isCheckoutPage) {
       return;
     }
+
+    cartPriceLock = await createCartLock();
 
     toggleTimer();
 
@@ -55,6 +61,8 @@ const
 
           if (reloadPage) {
             location.reload();
+          } else {
+            disableSubmitButton()
           }
 
         } catch (error) {
@@ -116,13 +124,37 @@ const
   },
   reloadPageOnTimerExpiry = () => {
     const
-      isCheckoutPage = _notificationUris.includes(location.pathname);
+      isCheckoutPage = _cartLockUris.includes(location.pathname);
 
     if (!isCheckoutPage) {
       return false;
     }
 
     return confirm(_confirmMessage);
+  },
+  createCartLock = async () => {
+    const result = await fetch(_cartLockCreateUrl, { method: "POST" });
+    return await result.json()
+  },
+  disableSubmitButton = () => {
+    const
+      btn = document.querySelector('.confirm-order-button');
+
+    if (!btn) {
+      return;
+    }
+
+    const clone = btn.cloneNode();
+    btn.replaceWith(clone);
+
+    clone.addEventListener('click', () => {
+      const
+        reload = reloadPageOnTimerExpiry();
+
+      if (reload) {
+        location.reload();
+      }
+    });
   };
 
 

@@ -8,8 +8,5 @@ public class DynamicPriceSettings : Nop.Core.Configuration.ISettings
     public decimal WeightConversion { get; set; } = 14.58332955m;
     public string ApiEndpoint { get; set; } = "https://api.metalpriceapi.com/v1/latest";
     public string ApiKey { get; set; } = "bad6c749effd9d1d8937845988089594";
-    public int CartPriceLock { get; set; } = 300;
-    public string GoldSymbol { get; set; } = "XAG";
-    public string SilverSymbol { get; set; } = "XAU";
-    public string PlatinumSymbol { get; set; } = "XPT";
+    public int CartPriceLock { get; set; } = 900;
 }

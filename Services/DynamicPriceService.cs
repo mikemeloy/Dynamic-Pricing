@@ -148,6 +148,7 @@ public class DynamicPriceService(ILogger logger, IWorkContext workContext, IStor
                              ApiSymbol = metal.ApiSymbol,
                              PreviousValue = metal.CurrentValue,
                              CurrentValue = sv.Value,
+                             Order = metal.Order,
                              Deleted = metal.Deleted,
                          };
 
@@ -208,10 +209,7 @@ public class DynamicPriceService(ILogger logger, IWorkContext workContext, IStor
                 ApiEndpoint = endpoint,
                 ApiKey = apiKey,
                 WeightConversion = conversion,
-                CartPriceLock = cartPriceLockInSeconds,
-                GoldSymbol = settings.GoldSymbol,
-                SilverSymbol = settings.SilverSymbol,
-                PlatinumSymbol = settings.PlatinumSymbol
+                CartPriceLock = cartPriceLockInSeconds
             });
         }
         catch (Exception ex)

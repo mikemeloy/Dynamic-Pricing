@@ -10,5 +10,6 @@ public class DynamicPricingMetalType : BaseEntity, ISoftDeletedEntity
     public required string ApiSymbol { get; set; }
     public decimal CurrentValue { get; set; }
     public decimal PreviousValue { get; set; }
+    public int Order { get; set; }
     public bool Deleted { get; set; }
 }
