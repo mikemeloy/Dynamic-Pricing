@@ -30,6 +30,18 @@ public class RouteProvider : IRouteProvider
         );
 
         endpointRouteBuilder.MapControllerRoute(
+            name: PluginDefaults.Import,
+            pattern: "dynamicprice/import",
+            defaults: new { controller = "dynamicprice", action = "import", area = AreaNames.ADMIN }
+        );
+
+        endpointRouteBuilder.MapControllerRoute(
+            name: PluginDefaults.Export,
+            pattern: "dynamicprice/export",
+            defaults: new { controller = "dynamicprice", action = "export", area = AreaNames.ADMIN }
+        );
+
+        endpointRouteBuilder.MapControllerRoute(
             name: PluginDefaults.GetDynamicPriceValues,
             pattern: "DynamicPrice/GetMetalValues",
             defaults: new { controller = "DynamicPricePublic", action = "GetMetalValues" }
