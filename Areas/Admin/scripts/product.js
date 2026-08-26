@@ -8,6 +8,7 @@ const
         _productId = productId
         setPageEvent();
         setPageWarning({ selectedMetalType, errorMessage, isExcluded });
+        moveSectionBelowPrice();
     },
     setPageEvent = () => {
         const
@@ -24,6 +25,17 @@ const
         }
 
         displayBarNotification?.(errorMessage, 2, 1000 * 30)
+    },
+    moveSectionBelowPrice = () => {
+        const
+            priceSection = document.querySelector('nop-card:has([id="product-price"])'),
+            dynamicPriceSection = document.querySelector('#dynamic-price-cards');
+
+        if (!priceSection || !dynamicPriceSection) {
+            return;
+        }
+
+        priceSection.moveBefore(dynamicPriceSection, null);
     }
 
 const

@@ -1,4 +1,5 @@
 ﻿using i7MEDIA.Plugin.Misc.Core.Extentions;
+using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Extensions;
 using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Repositories;
 using Nop.Core.Domain.Customers;
 using Nop.Services.Catalog;
@@ -15,13 +16,22 @@ public interface IDynamicPriceTierPriceService
     public Task DynamicPriceRoleCleanupAsync();
 }
 
-public class DynamicPriceTierPriceService(ICustomerService customerService, IProductService productService, IDynamicPricingRepository dynamicPricingRepository) : IDynamicPriceTierPriceService
+public class DynamicPriceTierPriceService(ICustomerService customerService, IProductService productService, IDynamicPricingRepository dynamicPricingRepository, IDynamicShoppingCartRepository shoppingCartRepo) : IDynamicPriceTierPriceService
 {
     public async Task AddTimedTierPriceAsync(int cartItemId, int customerId, decimal price, int productId, int quantity, DateTime endDateUtc, int storeId = 0)
     {
-        var hasExistingMap = await dynamicPricingRepository.GetDynamicPriceMappingByCartItemId(cartItemId);
+        var existingTierPrice = await dynamicPricingRepository.GetTierPricingByCartIdAsync(cartItemId);
 
-        if (hasExistingMap)
+        if (existingTierPrice.IsNotNull() && existingTierPrice.IsExpired())
+        {
+            existingTierPrice.Price = price;
+            existingTierPrice.EndDateTimeUtc = endDateUtc;
+
+            await productService.UpdateTierPriceAsync(existingTierPrice);
+            return;
+        }
+
+        if (existingTierPrice.IsNotNull())
         {
             return;
         }
@@ -66,8 +76,9 @@ public class DynamicPriceTierPriceService(ICustomerService customerService, IPro
 
             var customer = await customerService.GetCustomerByIdAsync(mapping.CustomerId);
 
-            await customerService.RemoveCustomerRoleMappingAsync(customer, role);
+            await dynamicPricingRepository.DeleteTierPricingByRoleIdAsync(role.Id);
             await customerService.DeleteCustomerRoleAsync(role);
+            await customerService.RemoveCustomerRoleMappingAsync(customer, role);
             await dynamicPricingRepository.DeleteDynamicPriceRoleMappingAsync(role.Id);
         }
     }

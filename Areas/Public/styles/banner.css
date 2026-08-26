@@ -4,11 +4,13 @@
   gap: 2rem;
   font-size: .8rem;
   border-bottom: 4px solid var(--accent-blue-active-color);
-
+  overflow: auto;
+  scrollbar-width: thin;
   position: sticky;
   top: 0;
   background-color: #fff;
   z-index: 15;
+  user-select: none;
 
   section {
     display: flex;
@@ -19,6 +21,7 @@
       color: var(--accent-primary-color);
       font-weight: 500;
       font-size: 1rem;
+      white-space: nowrap;
     }
 
     [data-positive="True"] {
@@ -40,11 +43,19 @@
   }
 
   [data-dynamic-price-timer] {
-    opacity: 0;
     margin-left: auto;
     padding-inline: 2rem;
+    transition: opacity 250ms;
+    font-size: 1rem;
+    background-color: var(--accent-blue-color);
+    color: #fff;
+
     [data-timer] {
       width: 3rem;
+    }
+
+    &[hidden] {
+      opacity: 0;
     }
   }
 }

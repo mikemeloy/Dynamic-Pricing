@@ -2,23 +2,11 @@
 
 @{
     var version = Model.Version;
-
-    var goldValue = Model.GoldPrice;
-    var goldDelta = Model.GoldDelta;
-    var goldSymbol = Model.GoldSymbol;
-
-    var silverValue = Model.SilverPrice;
-    var silverSymbol = Model.SilverSymbol;
-    var silverDelta = Model.SilverDelta;
-
-    var platValue = Model.PlatinumPrice;
-    var platSymbol = Model.PlatinumSymbol;
-    var platDelta = Model.PlatinumDelta;
-
-    var secondsSinceLastUpdate = Model.SecondsSinceLastPriceUpdate;
-    var cartPriceLock = Model.CartPriceLock;
+    var bannerTokens = Model.Tokens;    
+    var PriceUpdateInterval = Model.PriceUpdateInterval;
+    var SecondsSinceLastPriceUpdate = Model.SecondsSinceLastPriceUpdate;
     var getValuesRoute = Url.RouteUrl(PluginDefaults.GetDynamicPriceValues);
-    var priceUpdateInterval = Model.PriceUpdateInterval;
+    var cartLockCreateRoute = Url.RouteUrl(PluginDefaults.CreateCartLocks);
 }
 
 <!link rel="stylesheet" href="/Plugins/i7MEDIA.Plugin.Misc.Dynamic.Pricing/Areas/Public/styles/banner.css?v=@version" />
@@ -27,35 +15,27 @@
     import {init} from '/Plugins/i7MEDIA.Plugin.Misc.Dynamic.Pricing/Areas/Public/scripts/banner.js?v=@version';
 
     init({
-        secondsSinceLastUpdate: @secondsSinceLastUpdate,
-        cartPriceLock: @cartPriceLock,
         getRoute: '@getValuesRoute',
-        priceUpdateInterval: @priceUpdateInterval
+        cartLockCreateRoute: '@cartLockCreateRoute',
+        secondsSinceLastUpdate : @SecondsSinceLastPriceUpdate,
+        priceUpdateInterval: @PriceUpdateInterval,
+        confirmMessage: '@T("public.dynamic.price.banner.confirm")',
+        notificationUris: ['/checkout', '/simplecheckout']
     });
 </!script>
 
 <div data-dynamic-price-banner>
-    <section data-metal-symbol="@goldSymbol">
-        <span data-value-label>@T("admin.dynamic.price.banner.span.gold")</span>
-        <span data-current>@goldValue.ToCurrency()</span>
-        <span data-positive="@(goldDelta > 0)"></span>
-        <span data-delta>@goldDelta.ToCurrency()</span>
-    </section>
-    <section data-metal-symbol="@silverSymbol">
-        <span data-value-label> @T("admin.dynamic.price.banner.span.silver")</span>
-        <span data-current>@silverValue.ToCurrency()</span>
-        <span data-positive="@(silverDelta > 0)"></span>
-        <span data-delta>@silverDelta.ToCurrency()</span>
-    </section>
-
-    <section data-metal-symbol="@platSymbol">
-        <span data-value-label> @T("admin.dynamic.price.banner.span.platinum")</span>
-        <span data-current>@platValue.ToCurrency()</span>
-        <span data-positive="@(platDelta > 0)"></span>
-        <span data-delta>@platDelta.ToCurrency()</span>
-    </section>
-
-    <section data-dynamic-price-timer>
+    @foreach (var token in bannerTokens)
+    {
+        <section data-metal-symbol="@token.Symbol">
+            <span data-value-label>@T($"admin.dynamic.price.banner.label.{token.Symbol}", token.Symbol)</span>
+            <span data-current>@token.Price.ToCurrency()</span>
+            <span data-positive="@(token.Delta > 0)"></span>
+            <span data-delta>@token.Delta.ToCurrency()</span>
+        </section>
+    }
+    <section data-dynamic-price-timer hidden>
         <span>@T("admin.dynamic.price.banner.label.timer")</span><span data-timer>--:--</span>
     </section>
+</div>
 </div>

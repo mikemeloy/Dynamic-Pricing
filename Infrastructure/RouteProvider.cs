@@ -34,5 +34,11 @@ public class RouteProvider : IRouteProvider
             pattern: "DynamicPrice/GetMetalValues",
             defaults: new { controller = "DynamicPricePublic", action = "GetMetalValues" }
         );
+
+        endpointRouteBuilder.MapControllerRoute(
+           name: PluginDefaults.CreateCartLocks,
+           pattern: "DynamicPrice/CreateCartLocks",
+           defaults: new { controller = "DynamicPricePublic", action = "CreateCartLocks" }
+       );
     }
 }

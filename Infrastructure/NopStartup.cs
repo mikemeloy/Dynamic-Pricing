@@ -14,7 +14,7 @@ public class NopStartup : INopStartup
 
     public void Configure(IApplicationBuilder application)
     {
-
+        //application.UseCheckoutPageMiddleware();
     }
 
     public void ConfigureServices(IServiceCollection services, IConfiguration configuration)

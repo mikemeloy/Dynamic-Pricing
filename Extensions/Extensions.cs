@@ -4,7 +4,9 @@ using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Data;
 using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Enums;
 using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Models.Common;
 using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Models.Requests;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Logging;
 using Nop.Services.Logging;
 
@@ -12,6 +14,7 @@ namespace i7MEDIA.Plugin.Misc.Dynamic.Pricing.Extensions;
 
 public static class Extensions
 {
+    private static readonly string[] _checkoutPageRoutes = new[] { "/checkout", "/simplecheckout" };
     public static List<SelectListItem> ToSelectItemList<TSource>(this IEnumerable<TSource> enumerable, Func<TSource, string> label, Func<TSource, string> value)
     {
         return (from item in enumerable
@@ -81,5 +84,27 @@ public static class Extensions
     public static string ToJson<T>(this T source)
     {
         return JsonSerializer.Serialize(source);
+    }
+
+    public static bool IsCheckoutPage(this HttpContext source)
+    {
+        var path = source.Request.Path;
+
+        if (!path.HasValue)
+        {
+            return false;
+        }
+
+        return _checkoutPageRoutes.Contains(path.Value);
+    }
+
+    public static bool IsExpired(this TierPrice source)
+    {
+        if (source.IsNull())
+        {
+            return true;
+        }
+
+        return DateTime.UtcNow >= source.EndDateTimeUtc;
     }
 }
