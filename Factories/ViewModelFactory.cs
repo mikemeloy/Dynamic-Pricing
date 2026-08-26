@@ -71,14 +71,12 @@ public class ViewModelFactory(IPluginService pluginService, IDynamicPriceService
         var values = await dynamicPriceService.GetMetalTypesAsync();
         var settings = await dynamicPriceService.GetSettingsAsync<DynamicPriceSettings>();
         var scheduledTask = await dynamicPriceService.GetDynamicPriceScheduledTaskAsync();
-        var cartLock = await dynamicPriceService.GetCurrentCartLock();
 
         return new()
         {
             Version = await GetPluginVersionAsync(),
             SecondsSinceLastPriceUpdate = scheduledTask.LastSuccessUtc.DeltaInSeconds(),
             PriceUpdateInterval = scheduledTask.Seconds,
-            CartPriceLock = cartLock,
             Tokens = from t in values
                      where !string.IsNullOrWhiteSpace(t.ApiSymbol)
                      select new BannerTokens()

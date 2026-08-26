@@ -8,7 +8,7 @@ let
   _cartLockUris;
 
 const
-  init = async ({ getRoute, cartLockCreateRoute, cartPriceLock, secondsSinceLastUpdate, priceUpdateInterval, confirmMessage, notificationUris }) => {
+  init = async ({ getRoute, cartLockCreateRoute, secondsSinceLastUpdate, priceUpdateInterval, confirmMessage, notificationUris }) => {
     _getUrl = getRoute;
     _cartLockCreateUrl = cartLockCreateRoute;
     _confirmMessage = confirmMessage;
@@ -18,17 +18,18 @@ const
       : [];
 
     initPriceUpdateTimer({ secondsSinceLastUpdate, priceUpdateInterval });
-    await initCartLockTimer({ cartPriceLock });
+    await initCartLockTimer();
   },
-  initCartLockTimer = async ({ cartPriceLock }) => {
-    const
-      isCheckoutPage = _cartLockUris.includes(location.pathname);
+  initCartLockTimer = async () => {
+    let
+      isCheckoutPage = _cartLockUris.includes(location.pathname),
+      cartPriceLock = isCheckoutPage
+        ? await createCartLock()
+        : 0;
 
-    if (!isCheckoutPage) {
+    if (cartPriceLock == 0) {
       return;
     }
-
-    cartPriceLock = await createCartLock();
 
     toggleTimer();
 
@@ -96,8 +97,6 @@ const
       response = await fetch(_getUrl),
       metalTypes = await response.json();
 
-    console.table(metalTypes);
-
     for (const { ApiSymbol, CurrentValue, PreviousValue } of metalTypes) {
       const
         el = _banner.querySelector(`[data-metal-symbol="${ApiSymbol}"]`);
@@ -147,7 +146,9 @@ const
     const clone = btn.cloneNode();
     btn.replaceWith(clone);
 
-    clone.addEventListener('click', () => {
+    clone.addEventListener('click', (e) => {
+      e.preventDefault();
+
       const
         reload = reloadPageOnTimerExpiry();
 

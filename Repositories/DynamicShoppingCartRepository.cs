@@ -32,10 +32,16 @@ public class DynamicShoppingCartRepository(IRepository<ShoppingCartItem> cartIte
 
     public async Task<int> GetCartPriceLockByCustomerAsync(Customer customer)
     {
+        if (customer.IsNull())
+        {
+            return 0;
+        }
+
         var query = await (from t in tierPriceRepo.Table
                            join r in roleRepo.Table on t.CustomerRoleId equals r.Id
+                           join cart in cartItemRepo.Table on t.ProductId equals cart.ProductId
                            join map in mappingRepo.Table on r.Id equals map.CustomerRoleId
-                           where map.CustomerId == customer.Id
+                           where map.CustomerId == customer.Id && cart.CustomerId == customer.Id
                            select t.EndDateTimeUtc).FirstOrDefaultAsync();
 
         if (query.IsNull())

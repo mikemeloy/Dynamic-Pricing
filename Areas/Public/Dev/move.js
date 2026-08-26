@@ -3,10 +3,10 @@
 */
 
 var fs = require('fs')
-//C:/Repos/nopCommerce_4.90.0/Clean/src/Presentation/Nop.Web/Plugins/i7MEDIA.Plugin.Misc.Dynamic.Pricing/
+ 
 const
     sourceRoot = '../',
-    destinationRoot = 'C:/Repos/nopCommerce_4.90.0/Clean/src/Presentation/Nop.Web/Plugins/i7MEDIA.Plugin.Misc.Dynamic.Pricing/Areas/Public',
+    destinationRoot = 'C:/Repos/nopCommerce_4.90.4/src/Presentation/Nop.Web/Plugins/i7MEDIA.Plugin.Misc.Dynamic.Pricing/Areas/Public/',
     files = [
         '/Scripts/banner.js',
         '/Styles/banner.css', 

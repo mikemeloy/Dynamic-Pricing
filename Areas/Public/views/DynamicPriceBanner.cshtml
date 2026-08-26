@@ -2,8 +2,7 @@
 
 @{
     var version = Model.Version;
-    var bannerTokens = Model.Tokens;
-    var cartPriceLock = Model.CartPriceLock;
+    var bannerTokens = Model.Tokens;    
     var PriceUpdateInterval = Model.PriceUpdateInterval;
     var SecondsSinceLastPriceUpdate = Model.SecondsSinceLastPriceUpdate;
     var getValuesRoute = Url.RouteUrl(PluginDefaults.GetDynamicPriceValues);
@@ -16,13 +15,12 @@
     import {init} from '/Plugins/i7MEDIA.Plugin.Misc.Dynamic.Pricing/Areas/Public/scripts/banner.js?v=@version';
 
     init({
-    getRoute: '@getValuesRoute',
-    cartLockCreateRoute: '@cartLockCreateRoute',
-    cartPriceLock: @cartPriceLock,
-    secondsSinceLastUpdate : @SecondsSinceLastPriceUpdate,
-    priceUpdateInterval: @PriceUpdateInterval,
-    confirmMessage: '@T("public.dynamic.price.banner.confirm")',
-    notificationUris: ['/checkout', '/simplecheckout']
+        getRoute: '@getValuesRoute',
+        cartLockCreateRoute: '@cartLockCreateRoute',
+        secondsSinceLastUpdate : @SecondsSinceLastPriceUpdate,
+        priceUpdateInterval: @PriceUpdateInterval,
+        confirmMessage: '@T("public.dynamic.price.banner.confirm")',
+        notificationUris: ['/checkout', '/simplecheckout']
     });
 </!script>
 
@@ -30,7 +28,7 @@
     @foreach (var token in bannerTokens)
     {
         <section data-metal-symbol="@token.Symbol">
-            <span data-value-label>@T($"admin.dynamic.price.banner.span.{token.Symbol}", token.Symbol)</span>
+            <span data-value-label>@T($"admin.dynamic.price.banner.label.{token.Symbol}", token.Symbol)</span>
             <span data-current>@token.Price.ToCurrency()</span>
             <span data-positive="@(token.Delta > 0)"></span>
             <span data-delta>@token.Delta.ToCurrency()</span>

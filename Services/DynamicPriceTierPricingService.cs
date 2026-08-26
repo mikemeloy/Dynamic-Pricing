@@ -31,6 +31,11 @@ public class DynamicPriceTierPriceService(ICustomerService customerService, IPro
             return;
         }
 
+        if (existingTierPrice.IsNotNull())
+        {
+            return;
+        }
+
         var role = new CustomerRole() { Active = true, Name = $"{Guid.NewGuid()}", SystemName = $"{Guid.NewGuid()}" };
         await customerService.InsertCustomerRoleAsync(role);
 
@@ -71,10 +76,10 @@ public class DynamicPriceTierPriceService(ICustomerService customerService, IPro
 
             var customer = await customerService.GetCustomerByIdAsync(mapping.CustomerId);
 
-            await customerService.RemoveCustomerRoleMappingAsync(customer, role);
-            await customerService.DeleteCustomerRoleAsync(role);
-            await dynamicPricingRepository.DeleteDynamicPriceRoleMappingAsync(role.Id);
             await dynamicPricingRepository.DeleteTierPricingByRoleIdAsync(role.Id);
+            await customerService.DeleteCustomerRoleAsync(role);
+            await customerService.RemoveCustomerRoleMappingAsync(customer, role);
+            await dynamicPricingRepository.DeleteDynamicPriceRoleMappingAsync(role.Id);
         }
     }
 }

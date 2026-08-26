@@ -23,7 +23,7 @@ public class AdminProductViewModel()
     [NopResourceDisplayName("Admin.Dynamic.Price.Label.Price.Modifier")]
     public decimal PriceModifier { get; set; }
 
-    [NopResourceDisplayName("Admin.Dynamic.Price.Label.Price.Modifier.Type")]
+    [NopResourceDisplayName("admin.dynamic.price.label.price.modifier.type")]
     public int PriceModifierType { get; set; }
 
     public IList<SelectListItem> AvailableMetalTypes { get; set; } = new List<SelectListItem>();

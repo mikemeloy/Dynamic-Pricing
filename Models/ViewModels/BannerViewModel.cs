@@ -2,7 +2,6 @@
 
 public class BannerViewModel
 {
-    public required int CartPriceLock { get; set; }
     public required string Version { get; set; }
     public int SecondsSinceLastPriceUpdate { get; set; }
     public int PriceUpdateInterval { get; set; }
