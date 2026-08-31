@@ -31,10 +31,11 @@ public interface IDynamicPricingRepository
     public Task<IEnumerable<Product>> GetPatternProductsbyIdAsync(int patternId);
     public Task<IEnumerable<CartItemDetails>> GetCustomerDynamicallyPricedCartItemsAsync(int customerId);
     public Task DeleteTierPricingByRoleIdAsync(int id);
-    public Task<IEnumerable<Product>> GetProductsNotDynamicallyPricedAsync();
+    public Task<List<DynamicProduct>> GetProductsNotDynamicallyPricedAsync();
+    public Task<(Product? product, DynamicProductPricing? dynamicPrice)> GetProductBySkuAsync(string sku);
 }
 
-public class DynamicPricingRepository(IRepository<PatternProductMapping> productMappingRepository, IRepository<ShoppingCartItem> cartItemRepo, IRepository<TierPrice> tierPriceRepo, IRepository<DynamicPriceRoleMapping> roleMappingRepository, IRepository<DynamicPricingMetalType> metalTypeRepo, IRepository<DynamicProductPricing> dynamicPriceRepo, IRepository<Product> productRepo, IRepository<CustomerRole> customerRoleRepo) : IDynamicPricingRepository
+public class DynamicPricingRepository(IRepository<ProductManufacturer> productManufacturerRepo, IRepository<Manufacturer> manufacturerRepo, IRepository<PatternProductMapping> productMappingRepository, IRepository<ShoppingCartItem> cartItemRepo, IRepository<TierPrice> tierPriceRepo, IRepository<DynamicPriceRoleMapping> roleMappingRepository, IRepository<DynamicPricingMetalType> metalTypeRepo, IRepository<DynamicProductPricing> dynamicPriceRepo, IRepository<Product> productRepo, IRepository<CustomerRole> customerRoleRepo) : IDynamicPricingRepository
 {
     public async Task InsertDynamicPricingAsync(DynamicProductPricing dynamicPrice)
     {
@@ -151,6 +152,26 @@ public class DynamicPricingRepository(IRepository<PatternProductMapping> product
                 select p).FirstOrDefaultAsync();
     }
 
+    public async Task<(Product? product, DynamicProductPricing? dynamicPrice)> GetProductBySkuAsync(string sku)
+    {
+        var query = await (from p in productRepo.Table
+                           join dp in dynamicPriceRepo.Table on p.Id equals dp.ProductId into g_dyna
+                           from dy in g_dyna.DefaultIfEmpty()
+                           where p.Sku == sku
+                           select new { p, dy })
+                .FirstOrDefaultAsync();
+
+        if (query.IsNull())
+        {
+            return (product: null, dynamicPrice: null);
+        }
+
+        return (
+            product: query.p,
+            dynamicPrice: query.dy
+        );
+    }
+
     public async Task UpdateProductAsync(Product product)
     {
         await productRepo.UpdateAsync(product);
@@ -215,14 +236,29 @@ public class DynamicPricingRepository(IRepository<PatternProductMapping> product
         await tierPriceRepo.DeleteAsync(query);
     }
 
-    public async Task<IEnumerable<Product>> GetProductsNotDynamicallyPricedAsync()
+    public async Task<List<DynamicProduct>> GetProductsNotDynamicallyPricedAsync()
     {
-        var query = from p in productRepo.Table
-                    join dp in dynamicPriceRepo.Table on p.Id equals dp.ProductId into g_dp
-                    from dpPrice in g_dp.DefaultIfEmpty()
-                    where dpPrice == null
-                    select p;
+        var query = await (from p in productRepo.Table
+                           join pm in productManufacturerRepo.Table on p.Id equals pm.ProductId into g_pm
+                           from prodMan in g_pm.DefaultIfEmpty()
+                           join man in manufacturerRepo.Table on prodMan.ManufacturerId equals man.Id into g_man
+                           from manufacturer in g_man.DefaultIfEmpty()
+                           join dp in dynamicPriceRepo.Table on p.Id equals dp.ProductId into g_dp
+                           from dpPrice in g_dp.DefaultIfEmpty()
+                           join mt in metalTypeRepo.Table on dpPrice.MetalTypeId equals mt.Id into g_metal
+                           from metals in g_metal.DefaultIfEmpty()
+                           where
+                               p.ProductTypeId == (int)ProductType.SimpleProduct
+                               && dpPrice == null
+                               || (!dpPrice.Exclude && (dpPrice.MetalTypeId == 0 || dpPrice.Weight == 0))
+                           select new DynamicProduct(
+                                p.Sku,
+                                p.Name,
+                                dpPrice.GetValueOrDefault(p => p.Weight, 0),
+                                manufacturer.GetValueOrDefault(n => n.Name, ""),
+                                metals.GetValueOrDefault(m => m.Name, "")
+                           )).ToListAsync();
 
-        return await query.ToListAsync();
+        return query;
     }
 }

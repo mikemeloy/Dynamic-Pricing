@@ -93,8 +93,6 @@ public class DynamicPriceController(IDynamicPriceImportFactory importFactory, ID
     [HttpPost()]
     public async Task<IActionResult> ImportAsync(IFormCollection form)
     {
-
-
         if (form.IsNull() || form.Files.IsNull())
         {
             return Ok();
@@ -103,7 +101,6 @@ public class DynamicPriceController(IDynamicPriceImportFactory importFactory, ID
         var file = form.Files.First();
 
         await importFactory.ImportProductFromXSLTDataAsync(file);
-
 
         return Ok();
     }

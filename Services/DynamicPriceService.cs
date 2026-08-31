@@ -1,10 +1,10 @@
 ﻿using i7MEDIA.Plugin.Misc.Core.Extentions;
 using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Data;
 using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Extensions;
+using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Models.Common;
 using i7MEDIA.Plugin.Misc.Dynamic.Pricing.Repositories;
 using Nop.Core;
 using Nop.Core.Configuration;
-using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.ScheduleTasks;
 using Nop.Services.Configuration;
 using Nop.Services.Logging;
@@ -33,7 +33,8 @@ public interface IDynamicPriceService
     public Task SetPatternProductsAsDyanamicallyPricedAsync(int patternId);
     public Task UpdateDynamicallyPriceCartItemsAsync();
     public Task<int> GetCurrentCartLock();
-    public Task<IEnumerable<Product>> GetProductsNotDynamicallyPricedAsync();
+    public Task<IEnumerable<DynamicProduct>> GetProductsNotDynamicallyPricedAsync();
+    public Task UpdateProductBySkuAsync(string sku, decimal weight, int metalType);
 }
 
 public class DynamicPriceService(ILogger logger, IWorkContext workContext, IStoreContext storeContext, IDynamicPriceTierPriceService dynamicPricePriceService, IScheduleTaskService scheduleTaskService, ISettingService settingService, IDynamicPricingRepository dynamicPricingRepository, IDynamicShoppingCartRepository dynamicShoppingCartRepo) : IDynamicPriceService
@@ -317,7 +318,7 @@ public class DynamicPriceService(ILogger logger, IWorkContext workContext, IStor
         return 0;
     }
 
-    public async Task<IEnumerable<Product>> GetProductsNotDynamicallyPricedAsync()
+    public async Task<IEnumerable<DynamicProduct>> GetProductsNotDynamicallyPricedAsync()
     {
         try
         {
@@ -328,6 +329,37 @@ public class DynamicPriceService(ILogger logger, IWorkContext workContext, IStor
             await logger.ErrorAsync(nameof(GetProductsNotDynamicallyPricedAsync), ex);
         }
 
-        return Enumerable.Empty<Product>();
+        return Enumerable.Empty<DynamicProduct>();
+    }
+
+    public async Task UpdateProductBySkuAsync(string sku, decimal weight, int metalTypeId)
+    {
+        try
+        {
+            var (product, dynamicPrice) = await dynamicPricingRepository.GetProductBySkuAsync(sku);
+
+            if (product.IsNull())
+            {
+                return;
+            }
+
+            if (dynamicPrice.IsNull())
+            {
+                dynamicPrice = new() { CreatedOnUtc = DateTime.UtcNow };
+            }
+
+            dynamicPrice.BasePrice = product.Price;
+            dynamicPrice.Weight = weight;
+            dynamicPrice.ProductId = product.Id;
+            dynamicPrice.UpdatedOnUtc = DateTime.UtcNow;
+            dynamicPrice.UpdatedBy = -1;
+            dynamicPrice.MetalTypeId = metalTypeId;
+
+            await SaveDynamicPricingAsync(dynamicPrice);
+        }
+        catch (Exception ex)
+        {
+            await logger.ErrorAsync(nameof(UpdateProductBySkuAsync), ex);
+        }
     }
 }

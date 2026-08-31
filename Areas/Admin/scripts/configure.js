@@ -1,24 +1,40 @@
-let _saveUrl;
+let
+    _saveUrl,
+    _exportUrl,
+    _importUrl,
+    _errorMessage = "An error has occurred, check system logs for more details";
+
 const
-    init = ({ saveRoute }) => {
-        _saveUrl = saveRoute;
+    init = ({ saveUrl, exportUrl, importUrl }) => {
+        _saveUrl = saveUrl;
+        _exportUrl = exportUrl;
+        _importUrl = importUrl;
+
         setPageEvents();
     },
     setPageEvents = () => {
         const
             container = document.querySelector('[data-container-configure]'),
             save = container.querySelector('[data-save]'),
-            upload = container.querySelector('[data-dynamic-price-file] input'),
-            downLoad = container.querySelector('[data-dynamic-price-export]');
+            uploadProxy = container.querySelector('[data-dynamic-price-upload]'),
+            upload = uploadProxy.querySelector('input[type="file"]'),
+            downLoad = container.querySelector('[data-dynamic-price-download]');
 
         save.addEventListener('click', events.save);
-        upload.addEventListener('change', events.fileUploaded)
-        downLoad.addEventListener('click', events.fileExport);
+        upload.addEventListener('change', (e) => setLoading(() => events.fileUploaded(e)));
+        uploadProxy.addEventListener('click', () => upload.click());
+        downLoad.addEventListener('click', () => setLoading(events.fileDownload));
+    },
+    setLoading = async (func) => {
+        const el = document.querySelector('[data-dynamic-price-file]');
+
+        el.toggleAttribute('data-test');
+        await func();
+        el.toggleAttribute('data-test');
     }
 
 const events = {
-    save: async ({ currentTarget }) => {
-        currentTarget.disabled = true;
+    save: async () => {
         const
             formData = new FormData(),
             container = document.querySelector('[data-container-configure]'),
@@ -38,49 +54,56 @@ const events = {
                     method: "POST",
                     body: formData
                 });
-
+            displayBarNotification("Settings saved", 0, 3000);
         } catch (error) {
             console.error(error);
-        }
-        currentTarget.disabled = false;
-    },
-    fileUploaded: ({ currentTarget }) => {
-        const { files } = currentTarget;
-
-        for (const file of files) {
-            fileHelper.uploadFile(file);
+            displayBarNotification(_errorMessage, 1, 3000);
         }
     },
-    fileExport: async () => {
-       var resp = await fileHelper.downloadFile();
-        const data = await resp.blob();
+    fileUploaded: async ({ currentTarget }) => {
+        try {
+            const
+                { files } = currentTarget;
 
-        const
-            a = document.createElement('a'),
-            url = window.URL.createObjectURL(data);
+            for (const file of files) {
+                await fileHelper.uploadFile(file);
+            }
+            displayBarNotification("Item update complete", 0, 3000);
+        } catch (error) {
+            console.error(error);
+            displayBarNotification(_errorMessage, 1, 3000);
+        }
+    },
+    fileDownload: async () => {
+        try {
+            var resp = await fileHelper.downloadFile();
+            const data = await resp.blob();
 
-        a.href = url;
-        a.download = "products";
-        document.body.append(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
+            const
+                a = document.createElement('a'),
+                url = window.URL.createObjectURL(data);
+
+            a.href = url;
+            a.download = "products";
+            document.body.append(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error(error);
+            displayBarNotification(_errorMessage, 1, 3000);
+        }
     }
 }
 
 const fileHelper = {
     downloadFile: async () => {
-        const
-            url = `export`;
-
-        return await fetch(url, { method: 'GET' })
+        return await fetch(_exportUrl, { method: 'GET' })
     },
     uploadFile: async (file) => {
         const
             formData = new FormData(),
-            url = `import`,
             notFileType = !(file instanceof File);
-
 
         if (notFileType) {
             return {
@@ -92,12 +115,12 @@ const fileHelper = {
         formData.append('qqfile', file);
 
         try {
-            await fetch(url, { method: "POST", body: formData });
+            await fetch(_importUrl, { method: "POST", body: formData });
             return { success: true, error: undefined };
         } catch (error) {
             return { success: false, error };
         }
-    },
+    }
 }
 
 

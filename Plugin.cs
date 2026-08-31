@@ -78,7 +78,7 @@ public class Plugin(ILocalizationService localizationService, IDynamicPriceServi
         await localizationService.AddOrUpdateLocaleResourceAsync(new Dictionary<string, string>
         {
             ["admin.dynamic.price.section.label"] = "Dynamic Pricing",
-            ["admin.dynamic.price.label.base.price"] = "Base Price",
+            ["admin.dynamic.price.label.base.price"] = "Minimum Price",
             ["admin.dynamic.price.label.metal.type"] = "Metal Type",
             ["admin.dynamic.price.save"] = "Save",
             ["admin.dynamic.price.label.metal.weight"] = "Weight (oz t)",
@@ -98,7 +98,14 @@ public class Plugin(ILocalizationService localizationService, IDynamicPriceServi
             ["admin.dynamic.price.banner.label.XAG"] = "Silver",
             ["admin.dynamic.price.banner.label.XPD"] = "Palladium",
             ["admin.dynamic.price.banner.label.XCU"] = "Copper",
-            ["admin.dynamic.price.label.exclude"] = "Exclude"
+            ["admin.dynamic.price.label.exclude"] = "Exclude",
+
+            ["admin.dynamic.price.configure.upload.title"] = "Import Products",
+            ["admin.dynamic.price.configure.upload.description"] = "Only products with both a weight and metal type will be picked up by the Dynamic Pricing engine, use the import button below to upload a spreadsheet with a worksheet name “Products” with SKUs in column(A), Weights in column(F) and the Metal Type in column (E) to bulk update these fields.\r\n",
+            ["admin.dynamic.price.configure.upload.button"] = "Import",
+            ["admin.dynamic.price.configure.download.title"] = "Export Products",
+            ["admin.dynamic.price.configure.download.description"] = "Returns a spreadsheet with all product who DO NOT meet the criteria to be picked up by the Dynamic Pricing engine, all items that have been marked as Excluded will also be omitted. Note: includes a sheet with the currently available metal types.",
+            ["admin.dynamic.price.configure.download.button"] = "Export",
         });
     }
 

@@ -4,36 +4,54 @@
     Layout = "_ConfigurePlugin";
 
     var version = Model.Version;
-    var saveRoute = Url.RouteUrl(Model.SaveRoute);
+    var saveRoute = Url.RouteUrl(PluginDefaults.SaveDynamicPriceConfigure);
+    var importRoute = Url.RouteUrl(PluginDefaults.Import);
+    var exportRoute = Url.RouteUrl(PluginDefaults.Export);
 }
 
 <!link rel="stylesheet" href="/Plugins/i7MEDIA.Plugin.Misc.Dynamic.Pricing/Areas/Admin/Styles/configure.css?v=@version" />
 <!script type="module">
     import {init} from '/Plugins/i7MEDIA.Plugin.Misc.Dynamic.Pricing/Areas/Admin/Scripts/configure.js?v=@version';
 
-    init({saveRoute: '@saveRoute'});
+    init({
+    saveUrl: '@saveRoute',
+    exportUrl: '@exportRoute',
+    importUrl: '@importRoute'
+    });
 </!script>
 <div data-container-configure>
-    <main>
-        <nop-label asp-for="WeightConversion" />
-        <nop-editor asp-for="WeightConversion" />
+    <fieldset>
+        <legend>Settings</legend>
+        <main>
+            <nop-label asp-for="WeightConversion" />
+            <nop-editor asp-for="WeightConversion" />
+            <nop-label asp-for="ApiKey" />
+            <nop-editor asp-for="ApiKey" />
+            <nop-label asp-for="ApiEndpoint" />
+            <nop-editor asp-for="ApiEndpoint" />
+            <nop-label asp-for="CartPriceLock" />
+            <nop-editor asp-for="CartPriceLock" />
+        </main>
+        <footer data-actions>
+            <button type="button" data-save class="btn btn-success">
+                @T("admin.dynamic.price.save")
+            </button>
+        </footer>
+    </fieldset>
 
-        <nop-label asp-for="ApiKey" />
-        <nop-editor asp-for="ApiKey" />
-
-        <nop-label asp-for="ApiEndpoint" />
-        <nop-editor asp-for="ApiEndpoint" />
-
-        <nop-label asp-for="CartPriceLock" />
-        <nop-editor asp-for="CartPriceLock" />
-    </main>
-    <footer data-actions>
-        <button type="button" data-save class="btn btn-success">
-            @T("admin.dynamic.price.save")
-        </button>
-    </footer>
     <div data-dynamic-price-file>
-        <input type="file" value="Click" />
-        <button type="button" data-dynamic-price-export>Export</button>
+        <fieldset>
+            <legend>@T("admin.dynamic.price.configure.upload.title")</legend>
+            <main>@T("admin.dynamic.price.configure.upload.description")</main>
+            <button type="button" class="btn btn-success" data-dynamic-price-upload>
+                @T("admin.dynamic.price.configure.upload.button")
+                <input type="file" value="Click" hidden />
+            </button>
+        </fieldset>
+        <fieldset>
+            <legend>@T("admin.dynamic.price.configure.download.title")</legend>
+            <main>@T("admin.dynamic.price.configure.download.description")</main>
+            <button type="button" class="btn btn-success" data-dynamic-price-download>@T("admin.dynamic.price.configure.download.button")</button>
+        </fieldset>
     </div>
 </div>

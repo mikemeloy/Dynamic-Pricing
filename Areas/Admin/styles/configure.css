@@ -1,13 +1,71 @@
 [data-container-configure] {
-    >main {
-        display: grid;
-        grid-template-columns: min-content auto;
-        gap: 1rem;
+    >fieldset {
+        all: revert;
+        display: flex;
+        flex-direction: column;
+        border-radius: 6px;
+        font-size: 1.2rem;
+        border: 1px solid var(--gray);
+        overflow: hidden;
+        min-height: 3.2rem;
+        flex: 1;
+
+        legend {
+            all: revert;
+            font-size: 1.5rem;
+            color: var(--gray);
+        }
+
+        >main {
+            display: grid;
+            grid-template-columns: min-content auto;
+            gap: 1rem;
+        }
+
+        >footer {
+            display: flex;
+            flex-direction: row-reverse;
+            margin: 1rem 0;
+        }
     }
 
-    >footer {
+    [data-dynamic-price-file] {
         display: flex;
-        flex-direction: row-reverse;
-        margin: 1rem 0;
+        gap: 1rem;
+
+        fieldset {
+            all: revert;
+            display: flex;
+            flex-direction: column;
+            border-radius: 6px;
+            font-size: 1.2rem;
+            border: 1px solid var(--gray);
+            overflow: hidden;
+            min-height: 3.2rem;
+            flex: 1;
+
+            legend {
+                all: revert;
+                font-size: 1.5rem;
+                color: var(--gray);
+            }
+
+            main {
+                flex: 1;
+                margin: 1rem;
+            }
+
+            [data-select] {
+                width: 100%;
+                border: none;
+                border-bottom: 1px solid var(--text);
+            }
+        }
+
+        &[data-test] {
+            opacity: .6;
+            pointer-events: none;
+            user-select: none;
+        }
     }
 }

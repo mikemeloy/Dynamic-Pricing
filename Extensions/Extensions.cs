@@ -107,4 +107,18 @@ public static class Extensions
 
         return DateTime.UtcNow >= source.EndDateTimeUtc;
     }
+
+    public static int GetMetalTypeIdByName(this IEnumerable<DynamicPricingMetalType> source, string name)
+    {
+        if (source.IsNull() || name.IsNull())
+        {
+            return 0;
+        }
+
+        var metalType = source.FirstOrDefault(dp => dp.Name.ToLower() == name.ToLower());
+
+        return metalType.IsNull()
+            ? 0
+            : metalType.Id;
+    }
 }

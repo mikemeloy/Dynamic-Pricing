@@ -58,7 +58,6 @@ public class ViewModelFactory(IPluginService pluginService, IDynamicPriceService
         return new()
         {
             Version = await GetPluginVersionAsync(),
-            SaveRoute = PluginDefaults.SaveDynamicPriceConfigure,
             ApiKey = settings.ApiKey,
             WeightConversion = settings.WeightConversion,
             ApiEndpoint = settings.ApiEndpoint,
