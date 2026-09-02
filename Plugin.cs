@@ -86,6 +86,7 @@ public class Plugin(ILocalizationService localizationService, IDynamicPriceServi
             ["admin.dynamic.price.configure.api.key"] = "API key",
             ["admin.dynamic.price.configure.api.end.point"] = "End Point",
             ["admin.dynamic.price.configure.cart.lock"] = "Cart Lock",
+            ["admin.dynamic.price.configure.show.in.cart"] = "Show in Cart",
             ["admin.dynamic.price.banner.label.timer"] = "Time Left:",
             ["admin.dynamic.price.label.price.modifier.type"] = "Modifier Type",
             ["admin.dynamic.price.label.price.modifier"] = "Modifier Value",
@@ -99,7 +100,6 @@ public class Plugin(ILocalizationService localizationService, IDynamicPriceServi
             ["admin.dynamic.price.banner.label.XPD"] = "Palladium",
             ["admin.dynamic.price.banner.label.XCU"] = "Copper",
             ["admin.dynamic.price.label.exclude"] = "Exclude",
-
             ["admin.dynamic.price.configure.upload.title"] = "Import Products",
             ["admin.dynamic.price.configure.upload.description"] = "Only products with both a weight and metal type will be picked up by the Dynamic Pricing engine, use the import button below to upload a spreadsheet with a worksheet name “Products” with SKUs in column(A), Weights in column(F) and the Metal Type in column (E) to bulk update these fields.\r\n",
             ["admin.dynamic.price.configure.upload.button"] = "Import",

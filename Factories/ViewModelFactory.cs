@@ -61,7 +61,8 @@ public class ViewModelFactory(IPluginService pluginService, IDynamicPriceService
             ApiKey = settings.ApiKey,
             WeightConversion = settings.WeightConversion,
             ApiEndpoint = settings.ApiEndpoint,
-            CartPriceLock = settings.CartPriceLock
+            CartPriceLock = settings.CartPriceLock,
+            ShowInBanner = settings.ShowInBanner
         };
     }
 
@@ -77,7 +78,7 @@ public class ViewModelFactory(IPluginService pluginService, IDynamicPriceService
             SecondsSinceLastPriceUpdate = scheduledTask.LastSuccessUtc.DeltaInSeconds(),
             PriceUpdateInterval = scheduledTask.Seconds,
             Tokens = from t in values
-                     where !string.IsNullOrWhiteSpace(t.ApiSymbol)
+                     where !string.IsNullOrEmpty(t.ApiSymbol) && settings.ShowInBanner.Contains(t.ApiSymbol)
                      select new BannerTokens()
                      {
                          Symbol = t.ApiSymbol,

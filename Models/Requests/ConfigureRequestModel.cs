@@ -6,4 +6,5 @@ public class ConfigureRequestModel
     public required string ApiKey { get; set; }
     public decimal WeightConversion { get; set; }
     public int CartPriceLock { get; set; }
+    public required string ShowInBanner { get; set; }
 }

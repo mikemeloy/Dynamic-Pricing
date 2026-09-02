@@ -13,4 +13,6 @@ public class ConfigureViewModel
     public string ApiEndpoint { get; set; } = "";
     [NopResourceDisplayName("admin.dynamic.price.configure.cart.lock")]
     public int CartPriceLock { get; set; }
+    [NopResourceDisplayName("admin.dynamic.price.configure.show.in.cart")]
+    public string ShowInBanner { get; set; } = "";
 }

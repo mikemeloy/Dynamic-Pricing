@@ -27,7 +27,7 @@ public interface IDynamicPriceService
     public Task UpdateProductPricesByMetalType();
     public Task<T> GetSettingsAsync<T>() where T : ISettings, new();
     public Task InsertInitialSettings();
-    public Task SaveSettingsAsync(decimal conversion, string apiKey, string endpoint, int cartPriceLockInSeconds);
+    public Task SaveSettingsAsync(decimal conversion, string apiKey, string endpoint, int cartPriceLockInSeconds, string showInBanner);
     public Task<ScheduleTask> GetDynamicPriceScheduledTaskAsync();
     public Task SetPatternProductsAsDyanamicallyPricedAsync(IEnumerable<int> patternIds);
     public Task SetPatternProductsAsDyanamicallyPricedAsync(int patternId);
@@ -201,7 +201,7 @@ public class DynamicPriceService(ILogger logger, IWorkContext workContext, IStor
         );
     }
 
-    public async Task SaveSettingsAsync(decimal conversion, string apiKey, string endpoint, int cartPriceLockInSeconds)
+    public async Task SaveSettingsAsync(decimal conversion, string apiKey, string endpoint, int cartPriceLockInSeconds, string showInBanner)
     {
         try
         {
@@ -212,7 +212,8 @@ public class DynamicPriceService(ILogger logger, IWorkContext workContext, IStor
                 ApiEndpoint = endpoint,
                 ApiKey = apiKey,
                 WeightConversion = conversion,
-                CartPriceLock = cartPriceLockInSeconds
+                CartPriceLock = cartPriceLockInSeconds,
+                ShowInBanner = showInBanner
             });
         }
         catch (Exception ex)

@@ -69,7 +69,8 @@ public class DynamicPriceController(IDynamicPriceImportFactory importFactory, ID
              conversion: model.WeightConversion,
              apiKey: model.ApiKey,
              endpoint: model.ApiEndpoint,
-             cartPriceLockInSeconds: model.CartPriceLock
+             cartPriceLockInSeconds: model.CartPriceLock,
+             showInBanner: model.ShowInBanner
          );
 
         return Ok();

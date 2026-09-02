@@ -48,6 +48,7 @@ const events = {
             formData.append("ApiEndpoint", getValue("#ApiEndpoint"));
             formData.append("WeightConversion", getValue("#WeightConversion"));
             formData.append("CartPriceLock", getValue("#CartPriceLock"));
+            formData.append("ShowInBanner", getValue("#ShowInBanner"));
 
             const
                 response = await fetch(_saveUrl, {
